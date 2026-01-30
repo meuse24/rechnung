@@ -6,18 +6,21 @@
 Senior Frontend Engineer und Trainer - Entwicklung einer einfachen Schulungs-Webapp
 
 ### Projektziel
-Eine kleine Rechnungs-Webapp (Vite + React + TypeScript), bei der man:
-1. **Kunden und Leistungen** (Stundenleistungen) als Stammdaten verwalten kann
-2. **Firmenstammdaten** (Briefkopf, Bankverbindung, Zahlungsbedingungen) hinterlegen kann
-3. **Eine einzelne Rechnung** über ein Formular erstellen kann
-4. **Die Rechnung als JSON** speichern und wieder laden kann
-5. **Die Rechnung druckbar macht** (Browser Print / print-friendly Ansicht mit Firmendaten)
-6. **Vollständiger Datenexport/-import** für Backup und Browser-Migration
-7. **Integrierte Hilfe & Anleitung** für alle Funktionen
-8. **Österreichische Lokalisierung** (AT als Standard, Komma-Eingabe für Zahlen)
-9. **Single-File Build** (nur eine index.html für einfaches Deployment)
+Eine Rechnungs-Webapp (Vite + React + TypeScript) mit vollständiger Rechnungsverwaltung:
+1. **Kunden und Leistungen** (Stundenleistungen) als Stammdaten verwalten
+2. **CSV-Import** für Kunden und Leistungen mit Vorlagen-Download
+3. **Firmenstammdaten** (Briefkopf, Bankverbindung, Zahlungsbedingungen) hinterlegen
+4. **Rechnungshistorie** mit vollständiger Verwaltung aller Rechnungen
+5. **Status-Tracking** für Rechnungen (Entwurf, Versendet, Bezahlt, Storniert)
+6. **Rechnungsformular** zum Erstellen und Bearbeiten von Rechnungen
+7. **PDF-Export** mit direktem Download
+8. **Druckfunktion** (Browser Print mit Firmendaten)
+9. **Vollständiger Datenexport/-import** für Backup und Browser-Migration
+10. **Integrierte Hilfe & Anleitung** für alle Funktionen
+11. **Österreichische Lokalisierung** (AT als Standard, Komma-Eingabe für Zahlen)
+12. **Single-File Build** (nur eine index.html für einfaches Deployment)
 
-**Scope bewusst klein halten**: Single Invoice, keine Batch-Erstellung, kein CSV, keine ZIP, kein Server.
+**Scope**: Client-only App ohne Backend, optimiert für einfache Nutzung und Deployment.
 
 ## Tech Stack
 
@@ -59,6 +62,8 @@ Eine kleine Rechnungs-Webapp (Vite + React + TypeScript), bei der man:
 
 ### Invoice (Rechnung)
 ```typescript
+type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';
+
 {
   id: string;
   invoiceNumber: string;
@@ -66,6 +71,7 @@ Eine kleine Rechnungs-Webapp (Vite + React + TypeScript), bei der man:
   customerId: string;
   lines: InvoiceLine[];
   notes?: string;
+  status?: InvoiceStatus; // Entwurf, Versendet, Bezahlt, Storniert
 }
 
 interface InvoiceLine {
@@ -104,6 +110,8 @@ interface InvoiceLine {
 ### 2. Kunden-Seite
 - Liste aller Kunden anzeigen
 - Kunde hinzufügen/bearbeiten/löschen
+- **CSV-Vorlage herunterladen**: Download-Button für Excel-kompatible CSV-Vorlage
+- **CSV importieren**: Batch-Import mit Validierung und Vorschau
 - Speichern in LocalStorage als JSON-Liste
 - Empty State wenn keine Kunden vorhanden
 
@@ -113,26 +121,49 @@ interface InvoiceLine {
 - Felder: Name, Stundensatz, Steuersatz
 - Komma-Eingabe für Zahlen (8,5 statt 8.5)
 - Berechnung von Brutto/Stunde
+- **CSV-Vorlage herunterladen**: Download-Button für Excel-kompatible CSV-Vorlage
+- **CSV importieren**: Batch-Import mit Validierung und Vorschau (unterstützt Komma und Punkt)
 - Speichern in LocalStorage als JSON-Liste
 
-### 4. Rechnung-Seite
+### 4. Rechnungsübersicht (NEU)
+- Tabelle mit allen Rechnungen:
+  - Rechnungsnummer, Datum, Kunde, Nettobetrag, Bruttobetrag, Status
+- **Suche**: Nach Rechnungsnummer, Kunde oder Datum filtern
+- **Sortierung**: Nach Datum (neueste zuerst)
+- **Status-Badges**: Farbcodiert (Entwurf grau, Versendet blau, Bezahlt grün, Storniert rot)
+- **Aktionen pro Rechnung**:
+  - Bearbeiten (öffnet Rechnungsformular)
+  - Duplizieren (erstellt Kopie)
+  - Drucken (öffnet Druckansicht)
+  - Löschen (mit Bestätigung)
+- **"Neue Rechnung" Button**: Navigiert zu /invoice/new
+- Empty State wenn keine Rechnungen vorhanden
+- Zähler: "X Rechnungen" anzeigen
+
+### 5. Rechnungsformular
+- **URL-Parameter Support**: /invoice/new oder /invoice/:id
+- **Zurück-Button**: Navigiert zur Rechnungsübersicht
 - Formular:
-  - invoiceNumber, issueDate
+  - invoiceNumber, issueDate, **Status-Auswahl**
   - Kunde auswählen (Dropdown aus customers)
   - Positionen: Leistung auswählen, Stunden eingeben (Komma-Eingabe)
   - Position hinzufügen/entfernen
   - Live Summen anzeigen (Netto/Steuer/Brutto)
+  - Notizen / Zahlungshinweise
 - Buttons:
-  - "Neu" (neue Rechnung beginnen)
-  - "Laden" (aus LocalStorage laden)
-  - "Speichern" (in LocalStorage speichern)
+  - "Speichern" (speichert und kehrt zur Liste zurück)
+  - **"Als PDF"** (direkter PDF-Download)
   - "Drucken" (window.print())
 - Print-Ansicht: CSS Print Styles mit Firmendaten
 - Alert wenn keine Stammdaten vorhanden
+- Kundendetails-Vorschau
 
-### 5. Hilfe-Seite
+### 6. Hilfe-Seite
 - Schnellstart-Guide
-- Detaillierte Anleitungen für alle Features
+- Detaillierte Anleitungen für alle Features:
+  - Einstellungen, Kunden, Leistungen
+  - CSV-Import, Rechnungserstellung
+  - Drucken, PDF-Export, Backup
 - FAQ-Bereich
 - Technische Hinweise
 - Sicherheitshinweise
@@ -143,8 +174,9 @@ interface InvoiceLine {
 
 - `invoice_customers`: Liste aller Kunden
 - `invoice_services`: Liste aller Leistungen
-- `invoice_current`: Aktuelle Rechnung
-- `invoice_company_settings`: Firmenstammdaten (NEU)
+- `invoice_invoices`: **Array aller Rechnungen** (NEU - ersetzt invoice_current)
+- `invoice_current`: ~~Aktuelle Rechnung~~ (deprecated, nur für Rückwärtskompatibilität)
+- `invoice_company_settings`: Firmenstammdaten
 
 ## Entwicklungsschritte
 
