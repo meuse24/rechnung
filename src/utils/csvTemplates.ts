@@ -4,10 +4,10 @@
  * Creates and downloads a CSV template file for customers
  */
 export function downloadCustomerTemplate(): void {
-  const csvContent = `\uFEFFname,addressLine1,postalCode,city,countryCode,email
-"Musterfirma GmbH","Musterstraße 1","1010","Wien","AT","info@musterfirma.at"
-"Beispiel AG","Testweg 5","8010","Graz","AT","kontakt@beispiel.at"
-"Testkunde KG","Hauptplatz 10","4020","Linz","AT","office@testkunde.at"`;
+  const csvContent = `\uFEFFname;addressLine1;postalCode;city;countryCode;email
+"Musterfirma GmbH";"Musterstraße 1";"1010";"Wien";"AT";"info@musterfirma.at"
+"Beispiel AG";"Testweg 5";"8010";"Graz";"AT";"kontakt@beispiel.at"
+"Testkunde KG";"Hauptplatz 10";"4020";"Linz";"AT";"office@testkunde.at"`;
 
   downloadCSV(csvContent, 'customers-template.csv');
 }
@@ -16,11 +16,11 @@ export function downloadCustomerTemplate(): void {
  * Creates and downloads a CSV template file for services
  */
 export function downloadServiceTemplate(): void {
-  const csvContent = `\uFEFFname,hourlyRate,taxRate
-"Beratung",80.00,20
-"Entwicklung",95.00,20
-"Projektmanagement",110.00,20
-"Training",120.00,20`;
+  const csvContent = `\uFEFFname;hourlyRate;taxRate
+"Beratung";80.00;20
+"Entwicklung";95.00;20
+"Projektmanagement";110.00;20
+"Training";120.00;20`;
 
   downloadCSV(csvContent, 'services-template.csv');
 }

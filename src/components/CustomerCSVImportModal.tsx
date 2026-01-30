@@ -45,6 +45,7 @@ export function CustomerCSVImportModal({
     Papa.parse<CSVRow>(csvFile, {
       header: true,
       skipEmptyLines: true,
+      delimiter: ';',
       complete: (results) => {
         const validationErrors: string[] = [];
         const customers: Customer[] = [];
@@ -129,7 +130,7 @@ export function CustomerCSVImportModal({
         />
 
         <Text size="sm" c="dimmed">
-          Erwartetes Format: name, addressLine1, postalCode, city, countryCode, email
+          Erwartetes Format: name; addressLine1; postalCode; city; countryCode; email (Semikolon-getrennt)
         </Text>
 
         {errors.length > 0 && (

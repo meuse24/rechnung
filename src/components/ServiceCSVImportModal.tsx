@@ -51,6 +51,7 @@ export function ServiceCSVImportModal({
     Papa.parse<CSVRow>(csvFile, {
       header: true,
       skipEmptyLines: true,
+      delimiter: ';',
       complete: (results) => {
         const validationErrors: string[] = [];
         const services: Service[] = [];
@@ -138,7 +139,7 @@ export function ServiceCSVImportModal({
         />
 
         <Text size="sm" c="dimmed">
-          Erwartetes Format: name, hourlyRate, taxRate (Zahlen mit Komma oder Punkt)
+          Erwartetes Format: name; hourlyRate; taxRate (Semikolon-getrennt, Zahlen mit Komma oder Punkt)
         </Text>
 
         {errors.length > 0 && (
