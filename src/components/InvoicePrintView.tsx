@@ -12,15 +12,14 @@ interface InvoicePrintViewProps {
 
 export function InvoicePrintView({
   invoice,
-  customer,
+  customer: _customer,
   services,
   companySettings,
 }: InvoicePrintViewProps) {
   const totals = calculateInvoiceTotals(invoice, services);
-  const serviceMap = new Map(services.map((s) => [s.id, s]));
 
-  // Use customer snapshot if available (for immutable invoices)
-  const displayCustomer = invoice.customerSnapshot || customer;
+  // Use customer snapshot (required, no fallback)
+  const displayCustomer = invoice.customerSnapshot;
 
   if (!displayCustomer) {
     return null;
@@ -122,10 +121,10 @@ export function InvoicePrintView({
                 const lineCalc = totals.lines[index];
                 if (!lineCalc) return null;
 
-                // Use snapshot data if available, otherwise fall back to service lookup
-                const description = line.description || serviceMap.get(line.serviceId)?.name || 'Unbekannt';
-                const hourlyRate = line.hourlyRate ?? serviceMap.get(line.serviceId)?.hourlyRate ?? 0;
-                const taxRate = line.taxRate ?? serviceMap.get(line.serviceId)?.taxRate ?? 0;
+                // Use snapshot data (required, no fallback)
+                const description = line.description || 'Unbekannt';
+                const hourlyRate = line.hourlyRate ?? 0;
+                const taxRate = line.taxRate ?? 0;
 
                 return (
                   <Table.Tr key={index}>

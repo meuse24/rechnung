@@ -11,8 +11,7 @@ export interface ExportData {
   customers: Customer[];
   services: Service[];
   companySettings: CompanySettings | null;
-  invoices: Invoice[]; // Changed from currentInvoice to invoices array
-  currentInvoice?: Invoice | null; // Kept for backwards compatibility
+  invoices: Invoice[];
 }
 
 /**
@@ -86,18 +85,8 @@ export function importAllData(data: ExportData): void {
   saveToStorage(STORAGE_KEYS.SERVICES, data.services || []);
   saveToStorage(STORAGE_KEYS.COMPANY_SETTINGS, data.companySettings || null);
 
-  // Import invoices array (new format)
-  if (data.invoices && Array.isArray(data.invoices)) {
-    saveToStorage(STORAGE_KEYS.INVOICES, data.invoices);
-  }
-  // Backwards compatibility: import old currentInvoice as single invoice
-  else if (data.currentInvoice) {
-    saveToStorage(STORAGE_KEYS.INVOICES, [data.currentInvoice]);
-  }
-  // No invoices in import: explicitly clear
-  else {
-    saveToStorage(STORAGE_KEYS.INVOICES, []);
-  }
+  // Import invoices array
+  saveToStorage(STORAGE_KEYS.INVOICES, data.invoices || []);
 }
 
 /**

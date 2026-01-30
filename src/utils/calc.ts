@@ -24,32 +24,12 @@ export interface InvoiceTotals {
 
 export function calculateInvoiceTotals(
   invoice: Invoice,
-  services: Service[]
+  _services: Service[]
 ): InvoiceTotals {
-  const serviceMap = new Map(services.map(s => [s.id, s]));
-
   const lines: LineCalculation[] = invoice.lines.map(line => {
-    // Use snapshot data if available (for immutable invoices)
-    // Otherwise fall back to current service data (backwards compatibility)
-    let hourlyRate = line.hourlyRate;
-    let taxRate = line.taxRate;
-
-    if (hourlyRate === undefined || taxRate === undefined) {
-      const service = serviceMap.get(line.serviceId);
-      if (!service) {
-        return {
-          serviceId: line.serviceId,
-          hours: line.hours,
-          hourlyRate: 0,
-          taxRate: 0,
-          netAmount: 0,
-          taxAmount: 0,
-          grossAmount: 0,
-        };
-      }
-      hourlyRate = service.hourlyRate;
-      taxRate = service.taxRate;
-    }
+    // Use snapshot data (required, no fallback)
+    const hourlyRate = line.hourlyRate ?? 0;
+    const taxRate = line.taxRate ?? 0;
 
     const netAmount = roundToTwo(line.hours * hourlyRate);
     const taxAmount = roundToTwo(netAmount * (taxRate / 100));
