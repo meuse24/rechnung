@@ -11,11 +11,12 @@ import {
   Stack,
   Badge,
 } from '@mantine/core';
-import { IconEdit, IconTrash, IconPlus, IconDownload } from '@tabler/icons-react';
+import { IconEdit, IconTrash, IconPlus, IconDownload, IconUpload } from '@tabler/icons-react';
 import { Service } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { ServiceFormModal } from '@/components/ServiceFormModal';
 import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
+import { ServiceCSVImportModal } from '@/components/ServiceCSVImportModal';
 import { formatCurrency } from '@/utils/money';
 import { downloadServiceTemplate } from '@/utils/csvTemplates';
 
@@ -23,6 +24,7 @@ export function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [formModalOpened, setFormModalOpened] = useState(false);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
+  const [importModalOpened, setImportModalOpened] = useState(false);
   const [editingService, setEditingService] = useState<Service | undefined>(undefined);
   const [deletingServiceId, setDeletingServiceId] = useState<string | null>(null);
 
@@ -75,6 +77,12 @@ export function ServicesPage() {
     }
   };
 
+  const handleCSVImport = (importedServices: Service[]) => {
+    const updated = [...services, ...importedServices];
+    saveServices(updated);
+    alert(`${importedServices.length} Leistungen erfolgreich importiert.`);
+  };
+
   const deletingService = services.find((s) => s.id === deletingServiceId);
 
   return (
@@ -88,7 +96,14 @@ export function ServicesPage() {
               leftSection={<IconDownload size={16} />}
               onClick={downloadServiceTemplate}
             >
-              CSV-Vorlage herunterladen
+              CSV-Vorlage
+            </Button>
+            <Button
+              variant="light"
+              leftSection={<IconUpload size={16} />}
+              onClick={() => setImportModalOpened(true)}
+            >
+              CSV importieren
             </Button>
             <Button leftSection={<IconPlus size={16} />} onClick={handleAdd}>
               Neue Leistung
@@ -173,6 +188,12 @@ export function ServicesPage() {
         onConfirm={handleDeleteConfirm}
         title="Leistung löschen"
         message={`Möchten Sie die Leistung "${deletingService?.name}" wirklich löschen?`}
+      />
+
+      <ServiceCSVImportModal
+        opened={importModalOpened}
+        onClose={() => setImportModalOpened(false)}
+        onImport={handleCSVImport}
       />
     </Container>
   );
