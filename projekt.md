@@ -7,11 +7,15 @@ Senior Frontend Engineer und Trainer - Entwicklung einer einfachen Schulungs-Web
 
 ### Projektziel
 Eine kleine Rechnungs-Webapp (Vite + React + TypeScript), bei der man:
-1. Kunden und Leistungen (Stundenleistungen) als Stammdaten verwalten kann
-2. Firmenstammdaten (Briefkopf, Bankverbindung, Zahlungsbedingungen) hinterlegen kann
-3. Eine einzelne Rechnung über ein Formular erstellen kann
-4. Die Rechnung als JSON speichern und wieder laden kann
-5. Die Rechnung druckbar macht (Browser Print / print-friendly Ansicht)
+1. **Kunden und Leistungen** (Stundenleistungen) als Stammdaten verwalten kann
+2. **Firmenstammdaten** (Briefkopf, Bankverbindung, Zahlungsbedingungen) hinterlegen kann
+3. **Eine einzelne Rechnung** über ein Formular erstellen kann
+4. **Die Rechnung als JSON** speichern und wieder laden kann
+5. **Die Rechnung druckbar macht** (Browser Print / print-friendly Ansicht mit Firmendaten)
+6. **Vollständiger Datenexport/-import** für Backup und Browser-Migration
+7. **Integrierte Hilfe & Anleitung** für alle Funktionen
+8. **Österreichische Lokalisierung** (AT als Standard, Komma-Eingabe für Zahlen)
+9. **Single-File Build** (nur eine index.html für einfaches Deployment)
 
 **Scope bewusst klein halten**: Single Invoice, keine Batch-Erstellung, kein CSV, keine ZIP, kein Server.
 
@@ -78,32 +82,7 @@ interface InvoiceLine {
 
 ## Screens / Seiten
 
-### 1. Kunden-Seite
-- Liste aller Kunden anzeigen
-- Kunde hinzufügen/bearbeiten/löschen
-- Speichern in LocalStorage als JSON-Liste
-- Optional: Export/Import JSON
-
-### 2. Leistungen-Seite
-- Liste aller Leistungen anzeigen
-- Leistung hinzufügen/bearbeiten/löschen
-- Felder: Name, Stundensatz, Steuersatz
-- Speichern in LocalStorage als JSON-Liste
-
-### 3. Rechnung-Seite
-- Formular:
-  - invoiceNumber, issueDate
-  - Kunde auswählen (Dropdown aus customers)
-  - Positionen: Leistung auswählen, Stunden eingeben
-  - Position hinzufügen/entfernen
-  - Live Summen anzeigen (Netto/Steuer/Brutto)
-- Buttons:
-  - "Als JSON speichern" (in LocalStorage)
-  - "JSON laden" (aus LocalStorage)
-  - "Drucken" (window.print())
-- Print-Ansicht: CSS Print Styles
-
-### 4. Einstellungen-Seite (NEU)
+### 1. Einstellungen-Seite
 - Firmenstammdaten / Briefkopf:
   - Firmenname, Adresse, Kontaktdaten
   - Steuernummer, USt-IdNr.
@@ -112,8 +91,50 @@ interface InvoiceLine {
 - Zahlungsbedingungen:
   - Standard Zahlungstext
   - Standard-Notizen für Rechnungen
+- **Datensicherung**:
+  - Export aller Daten als JSON (Kunden, Leistungen, Firmendaten, Rechnung)
+  - Import von JSON-Backup für Migration zwischen Browsern
 - Speichern in LocalStorage
 - Daten werden auf gedruckten Rechnungen angezeigt
+- Standard-Land: Österreich (AT)
+
+### 2. Kunden-Seite
+- Liste aller Kunden anzeigen
+- Kunde hinzufügen/bearbeiten/löschen
+- Speichern in LocalStorage als JSON-Liste
+- Empty State wenn keine Kunden vorhanden
+
+### 3. Leistungen-Seite
+- Liste aller Leistungen anzeigen
+- Leistung hinzufügen/bearbeiten/löschen
+- Felder: Name, Stundensatz, Steuersatz
+- Komma-Eingabe für Zahlen (8,5 statt 8.5)
+- Berechnung von Brutto/Stunde
+- Speichern in LocalStorage als JSON-Liste
+
+### 4. Rechnung-Seite
+- Formular:
+  - invoiceNumber, issueDate
+  - Kunde auswählen (Dropdown aus customers)
+  - Positionen: Leistung auswählen, Stunden eingeben (Komma-Eingabe)
+  - Position hinzufügen/entfernen
+  - Live Summen anzeigen (Netto/Steuer/Brutto)
+- Buttons:
+  - "Neu" (neue Rechnung beginnen)
+  - "Laden" (aus LocalStorage laden)
+  - "Speichern" (in LocalStorage speichern)
+  - "Drucken" (window.print())
+- Print-Ansicht: CSS Print Styles mit Firmendaten
+- Alert wenn keine Stammdaten vorhanden
+
+### 5. Hilfe-Seite
+- Schnellstart-Guide
+- Detaillierte Anleitungen für alle Features
+- FAQ-Bereich
+- Technische Hinweise
+- Sicherheitshinweise
+- Strukturiert mit Accordion-Komponenten
+- Erreichbar über Hilfe-Button (?) in der Navigation
 
 ## LocalStorage Keys
 
@@ -461,11 +482,15 @@ src/
 1. **React Grundlagen**: Komponenten, Props, State, Hooks
 2. **TypeScript**: Typisierung, Interfaces, Type Safety
 3. **State Management**: useState, useEffect, Daten-Flow
-4. **Formular-Handling**: Controlled Components, Validation
-5. **UI Library nutzen**: Mantine Components
-6. **Browser APIs**: LocalStorage, window.print()
+4. **Formular-Handling**: Controlled Components, Validation, Lokalisierung (Komma-Eingabe)
+5. **UI Library nutzen**: Mantine Components, Responsive Design
+6. **Browser APIs**: LocalStorage, FileReader, Blob/URL, window.print()
 7. **Berechnungslogik**: Funktionen auslagern, testen
 8. **Code-Organisation**: Ordnerstruktur, Separation of Concerns
+9. **Import/Export Pattern**: JSON-Backup für Client-Only Apps
+10. **Build-Optimierung**: Single-File Build, Production-ready Output
+11. **Internationalisierung**: Zahlenformate, Länder-Defaults
+12. **Dokumentation**: Benutzerfreundliche Hilfe-Seiten erstellen
 
 ---
 
@@ -473,15 +498,16 @@ src/
 
 **Status**: ✅ VOLLSTÄNDIG ABGESCHLOSSEN
 
-Alle 8 Entwicklungsschritte wurden erfolgreich implementiert:
+Alle 9 Entwicklungsschritte wurden erfolgreich implementiert:
 - ✅ Schritt 1: Projekt-Setup + Navigation
 - ✅ Schritt 2: Kundenverwaltung (CRUD)
 - ✅ Schritt 3: Leistungsverwaltung (CRUD)
 - ✅ Schritt 4: Rechnungsformular
 - ✅ Schritt 5: JSON Speichern/Laden
 - ✅ Schritt 6: Druckfunktion
-- ✅ Schritt 7: Firmenstammdaten / Einstellungen
+- ✅ Schritt 7: Firmenstammdaten / Einstellungen + Export/Import
 - ✅ Schritt 8: Hilfe & Anleitung
+- ✅ Schritt 9: Single-File Build + Komma-Eingabe
 
 **Alle Akzeptanzkriterien erfüllt** ✅
 
@@ -498,6 +524,8 @@ Alle 8 Entwicklungsschritte wurden erfolgreich implementiert:
 9. **Print-Optimierung**: CSS @media print für professionellen Druck mit Firmendaten
 10. **Code-Qualität**: ESLint Integration
 11. **Benutzerfreundlichkeit**: Umfassende Hilfe & Anleitung integriert
+12. **Lokalisierung**: Österreichische Defaults, Deutsche Zahlenformatierung (Komma)
+13. **Single-File Build**: Optimiert für einfaches Deployment (nur 1 HTML-Datei)
 
 ### Statistik
 
@@ -537,9 +565,13 @@ npm run lint
 
 ### Nächste Schritte (Optional für erweiterte Schulung)
 
-1. **Testing**: Unit Tests für calc.ts und money.ts
-2. **Export**: JSON Download/Upload Funktionalität
-3. **PDF Export**: Bibliothek wie jsPDF integrieren
-4. **Mehrere Rechnungen**: Liste aller Rechnungen verwalten
-5. **Validierung**: Zod für Schema-Validierung
-6. **State Management**: Zustand für globalen State
+1. **Testing**: Unit Tests für calc.ts, money.ts und dataExport.ts mit Vitest
+2. **PDF Export**: Bibliothek wie jsPDF oder Puppeteer integrieren für direkte PDF-Generierung
+3. **Mehrere Rechnungen**: Liste aller Rechnungen verwalten (Rechnungshistorie)
+4. **Validierung**: Zod für Schema-Validierung bei Export/Import
+5. **State Management**: Zustand für globalen State (ersetzt LocalStorage direkt)
+6. **Mehrsprachigkeit**: i18n Support für Deutsch/Englisch
+7. **Email-Versand**: Integration für Rechnungsversand per Email
+8. **Rechnungsvorlagen**: Verschiedene Design-Templates zur Auswahl
+9. **Wiederkehrende Rechnungen**: Templates für regelmäßige Abrechnungen
+10. **Statistiken**: Dashboard mit Umsatzübersicht und Kundenstatistiken
