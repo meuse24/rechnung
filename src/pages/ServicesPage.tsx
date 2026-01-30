@@ -11,12 +11,13 @@ import {
   Stack,
   Badge,
 } from '@mantine/core';
-import { IconEdit, IconTrash, IconPlus } from '@tabler/icons-react';
+import { IconEdit, IconTrash, IconPlus, IconDownload } from '@tabler/icons-react';
 import { Service } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { ServiceFormModal } from '@/components/ServiceFormModal';
 import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { formatCurrency } from '@/utils/money';
+import { downloadServiceTemplate } from '@/utils/csvTemplates';
 
 export function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -81,9 +82,18 @@ export function ServicesPage() {
       <Stack gap="md">
         <Group justify="space-between">
           <Title order={1}>Leistungsverwaltung</Title>
-          <Button leftSection={<IconPlus size={16} />} onClick={handleAdd}>
-            Neue Leistung
-          </Button>
+          <Group gap="xs">
+            <Button
+              variant="light"
+              leftSection={<IconDownload size={16} />}
+              onClick={downloadServiceTemplate}
+            >
+              CSV-Vorlage herunterladen
+            </Button>
+            <Button leftSection={<IconPlus size={16} />} onClick={handleAdd}>
+              Neue Leistung
+            </Button>
+          </Group>
         </Group>
 
         {services.length === 0 ? (

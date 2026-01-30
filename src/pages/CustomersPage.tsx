@@ -10,11 +10,12 @@ import {
   Paper,
   Stack,
 } from '@mantine/core';
-import { IconEdit, IconTrash, IconPlus } from '@tabler/icons-react';
+import { IconEdit, IconTrash, IconPlus, IconDownload } from '@tabler/icons-react';
 import { Customer } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { CustomerFormModal } from '@/components/CustomerFormModal';
 import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
+import { downloadCustomerTemplate } from '@/utils/csvTemplates';
 
 export function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -79,9 +80,18 @@ export function CustomersPage() {
       <Stack gap="md">
         <Group justify="space-between">
           <Title order={1}>Kundenverwaltung</Title>
-          <Button leftSection={<IconPlus size={16} />} onClick={handleAdd}>
-            Neuer Kunde
-          </Button>
+          <Group gap="xs">
+            <Button
+              variant="light"
+              leftSection={<IconDownload size={16} />}
+              onClick={downloadCustomerTemplate}
+            >
+              CSV-Vorlage herunterladen
+            </Button>
+            <Button leftSection={<IconPlus size={16} />} onClick={handleAdd}>
+              Neuer Kunde
+            </Button>
+          </Group>
         </Group>
 
         {customers.length === 0 ? (
