@@ -10,17 +10,19 @@ import {
   Paper,
   Stack,
 } from '@mantine/core';
-import { IconEdit, IconTrash, IconPlus, IconDownload } from '@tabler/icons-react';
+import { IconEdit, IconTrash, IconPlus, IconDownload, IconUpload } from '@tabler/icons-react';
 import { Customer } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { CustomerFormModal } from '@/components/CustomerFormModal';
 import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
+import { CustomerCSVImportModal } from '@/components/CustomerCSVImportModal';
 import { downloadCustomerTemplate } from '@/utils/csvTemplates';
 
 export function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [formModalOpened, setFormModalOpened] = useState(false);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
+  const [importModalOpened, setImportModalOpened] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined);
   const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(null);
 
@@ -73,6 +75,12 @@ export function CustomersPage() {
     }
   };
 
+  const handleCSVImport = (importedCustomers: Customer[]) => {
+    const updated = [...customers, ...importedCustomers];
+    saveCustomers(updated);
+    alert(`${importedCustomers.length} Kunden erfolgreich importiert.`);
+  };
+
   const deletingCustomer = customers.find((c) => c.id === deletingCustomerId);
 
   return (
@@ -86,7 +94,14 @@ export function CustomersPage() {
               leftSection={<IconDownload size={16} />}
               onClick={downloadCustomerTemplate}
             >
-              CSV-Vorlage herunterladen
+              CSV-Vorlage
+            </Button>
+            <Button
+              variant="light"
+              leftSection={<IconUpload size={16} />}
+              onClick={() => setImportModalOpened(true)}
+            >
+              CSV importieren
             </Button>
             <Button leftSection={<IconPlus size={16} />} onClick={handleAdd}>
               Neuer Kunde
@@ -162,6 +177,12 @@ export function CustomersPage() {
         onConfirm={handleDeleteConfirm}
         title="Kunde löschen"
         message={`Möchten Sie den Kunden "${deletingCustomer?.name}" wirklich löschen?`}
+      />
+
+      <CustomerCSVImportModal
+        opened={importModalOpened}
+        onClose={() => setImportModalOpened(false)}
+        onImport={handleCSVImport}
       />
     </Container>
   );
