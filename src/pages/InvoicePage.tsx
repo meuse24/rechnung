@@ -23,6 +23,7 @@ import {
   IconPrinter,
   IconInfoCircle,
   IconArrowLeft,
+  IconFileTypePdf,
 } from '@tabler/icons-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -37,6 +38,7 @@ import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localSto
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
 import { InvoicePrintView } from '@/components/InvoicePrintView';
+import { generatePDF, generatePDFFilename } from '@/utils/pdfExport';
 
 export function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -143,6 +145,24 @@ export function InvoicePage() {
     window.print();
   };
 
+  const handlePDFExport = async () => {
+    const printElement = document.querySelector('.print-only') as HTMLElement;
+    if (!printElement) {
+      alert('Fehler: Druckansicht nicht gefunden.');
+      return;
+    }
+
+    const customerName = selectedCustomer?.name || 'Unbekannt';
+    const filename = generatePDFFilename(invoice.invoiceNumber, customerName);
+
+    try {
+      await generatePDF(printElement, filename);
+    } catch (error) {
+      alert('Fehler beim Erstellen der PDF-Datei.');
+      console.error(error);
+    }
+  };
+
   const handleBack = () => {
     navigate('/invoices');
   };
@@ -196,6 +216,15 @@ export function InvoicePage() {
               onClick={handleSave}
             >
               Speichern
+            </Button>
+            <Button
+              variant="light"
+              size="sm"
+              leftSection={<IconFileTypePdf size={16} />}
+              onClick={handlePDFExport}
+              disabled={!invoice.invoiceNumber || !invoice.customerId}
+            >
+              Als PDF
             </Button>
             <Button
               variant="light"
