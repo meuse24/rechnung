@@ -18,6 +18,7 @@ import {
   IconDownload,
   IconUpload,
   IconFileExport,
+  IconDatabase,
 } from '@tabler/icons-react';
 import { CompanySettings } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
@@ -27,6 +28,7 @@ import {
   importDataFromFile,
   importAllData,
 } from '@/utils/dataExport';
+import { downloadSampleData } from '@/utils/sampleData';
 
 const DEFAULT_SETTINGS: CompanySettings = {
   companyName: '',
@@ -122,6 +124,10 @@ export function SettingsPage() {
     fileInputRef.current?.click();
   };
 
+  const handleDownloadSample = () => {
+    downloadSampleData();
+  };
+
   return (
     <Container size="lg" py="xl">
       <Stack gap="lg">
@@ -213,6 +219,25 @@ export function SettingsPage() {
                 onChange={handleImport}
                 style={{ display: 'none' }}
               />
+            </Group>
+
+            <Divider />
+
+            <Text size="sm">
+              <strong>Musterdaten:</strong> Laden Sie eine JSON-Datei mit realistischen
+              österreichischen Beispieldaten herunter (Firma, Kunden, Leistungen, Rechnungen).
+              Perfekt zum Testen der Anwendung.
+            </Text>
+
+            <Group>
+              <Button
+                leftSection={<IconDatabase size={16} />}
+                onClick={handleDownloadSample}
+                variant="outline"
+                color="cyan"
+              >
+                Musterdaten herunterladen
+              </Button>
             </Group>
           </Stack>
         </Paper>
