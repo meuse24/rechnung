@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Container,
   Title,
@@ -188,7 +188,7 @@ export function InvoicePage() {
       return;
     }
 
-    const customerName = invoice.customerSnapshot?.name || selectedCustomer?.name || 'Unbekannt';
+    const customerName = previewInvoice.customerSnapshot?.name || selectedCustomer?.name || 'Unbekannt';
     const filename = generatePDFFilename(invoice.invoiceNumber, customerName);
 
     try {
@@ -220,8 +220,13 @@ export function InvoicePage() {
     navigate('/invoices');
   };
 
+  // Create live preview invoice with snapshots for calculations and display
+  const previewInvoice = useMemo(() => {
+    return createInvoiceSnapshot();
+  }, [invoice, customers, services]);
+
   // Berechnungen
-  const totals = calculateInvoiceTotals(invoice, services);
+  const totals = calculateInvoiceTotals(previewInvoice, services);
   const selectedCustomer = customers.find((c) => c.id === invoice.customerId);
 
   const customerOptions = customers.map((c) => ({
@@ -481,7 +486,7 @@ export function InvoicePage() {
 
       {/* Print View - nur beim Drucken sichtbar */}
       <InvoicePrintView
-        invoice={invoice}
+        invoice={previewInvoice}
         customer={selectedCustomer}
         services={services}
         companySettings={companySettings}
