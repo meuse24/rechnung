@@ -77,24 +77,26 @@ export function validateImportData(data: unknown): data is ExportData {
 
 /**
  * Importiert Daten aus exportiertem Objekt
+ * IMPORTANT: Always sets all keys to ensure complete overwrite
  */
 export function importAllData(data: ExportData): void {
-  // Speichere alle Daten in LocalStorage
-  saveToStorage(STORAGE_KEYS.CUSTOMERS, data.customers);
-  saveToStorage(STORAGE_KEYS.SERVICES, data.services);
-
-  if (data.companySettings) {
-    saveToStorage(STORAGE_KEYS.COMPANY_SETTINGS, data.companySettings);
-  }
+  // Always save all data to LocalStorage (even if null/empty)
+  // This ensures complete overwrite and prevents data mixing
+  saveToStorage(STORAGE_KEYS.CUSTOMERS, data.customers || []);
+  saveToStorage(STORAGE_KEYS.SERVICES, data.services || []);
+  saveToStorage(STORAGE_KEYS.COMPANY_SETTINGS, data.companySettings || null);
 
   // Import invoices array (new format)
   if (data.invoices && Array.isArray(data.invoices)) {
     saveToStorage(STORAGE_KEYS.INVOICES, data.invoices);
   }
-
   // Backwards compatibility: import old currentInvoice as single invoice
-  if (data.currentInvoice && (!data.invoices || data.invoices.length === 0)) {
+  else if (data.currentInvoice) {
     saveToStorage(STORAGE_KEYS.INVOICES, [data.currentInvoice]);
+  }
+  // No invoices in import: explicitly clear
+  else {
+    saveToStorage(STORAGE_KEYS.INVOICES, []);
   }
 }
 
