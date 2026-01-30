@@ -23,9 +23,12 @@ Eine kleine Rechnungs-Webapp (Vite + React + TypeScript), bei der man:
 
 - **Framework**: Vite + React 18 + TypeScript
 - **UI**: Mantine v7
-- **State**: React useState + useEffect (oder Zustand für erweiterte Übung)
-- **Validation**: Optional - einfache Pflichtfeld-Checks
+- **Routing**: React Router v6
+- **State**: React useState + useEffect
+- **Validation**: Einfache Pflichtfeld-Checks + CSV-Validierung
 - **Persistence**: LocalStorage (keine DB, kein Backend)
+- **CSV Parsing**: papaparse
+- **PDF Export**: jsPDF + html2canvas
 - **Linting**: ESLint mit TypeScript & React Hooks Plugins
 - **Build**: Single-File Build (vite-plugin-singlefile) - nur index.html im dist-Ordner
 
@@ -428,6 +431,135 @@ export default defineConfig({
 
 ---
 
+### ✅ Schritt 10: CSV-Importvorlagen (ERLEDIGT)
+- [x] Download-Button für Kunden-CSV-Vorlage
+- [x] Download-Button für Leistungen-CSV-Vorlage
+- [x] UTF-8 BOM Encoding für Excel-Kompatibilität
+- [x] Österreichische Beispieldaten
+
+**Utility**:
+- csvTemplates.ts - CSV-Vorlagen-Generierung und Download
+
+**Features**:
+- **Kunden-Vorlage**: 3 österreichische Beispielkunden (Wien, Graz, Linz)
+- **Leistungen-Vorlage**: 4 Beispiel-Leistungen mit Stundensätzen
+- **Download-Buttons**: Prominent auf Kunden- und Leistungsseite platziert
+- **Excel-kompatibel**: UTF-8 BOM für korrekte Darstellung von Umlauten
+- **Standard CSV-Format**: Komma-separiert mit Header-Zeile
+
+---
+
+### ✅ Schritt 11: CSV Import für Kunden und Leistungen (ERLEDIGT)
+- [x] CSV Import für Kunden mit Vorschau
+- [x] CSV Import für Leistungen mit Vorschau
+- [x] Validierung aller importierten Daten
+- [x] Batch-Import Funktionalität
+- [x] Fehlerbehandlung und Feedback
+
+**Komponenten**:
+- CustomerCSVImportModal.tsx - CSV Import für Kunden
+- ServiceCSVImportModal.tsx - CSV Import für Leistungen
+
+**Features - Kunden-Import**:
+- File Upload mit CSV-Parser (papaparse)
+- Header-basiertes Parsing (name, addressLine1, postalCode, city, countryCode, email)
+- Validierung von Pflichtfeldern
+- Vorschau-Tabelle zeigt erste 5 Einträge
+- Generierung neuer UUIDs für importierte Kunden
+- Feedback: "X Kunden erfolgreich importiert"
+
+**Features - Leistungen-Import**:
+- File Upload mit CSV-Parser (papaparse)
+- Header-basiertes Parsing (name, hourlyRate, taxRate)
+- Unterstützung für Komma UND Punkt als Dezimaltrenner (80,00 oder 80.00)
+- Validierung: hourlyRate > 0, taxRate 0-100
+- Vorschau mit Brutto/Stunde Berechnung
+- Generierung neuer UUIDs für importierte Leistungen
+- Fehlerbehandlung mit detaillierten Validierungsfehlern
+
+**Library**:
+- papaparse - CSV Parsing Library
+
+---
+
+### ✅ Schritt 12: Rechnungshistorie und Verwaltung (ERLEDIGT)
+- [x] Neue Seite für Rechnungsübersicht
+- [x] Liste aller Rechnungen mit Status
+- [x] Suche und Filter-Funktionalität
+- [x] CRUD-Operationen für Rechnungen
+- [x] Status-Verwaltung (Entwurf, Versendet, Bezahlt, Storniert)
+- [x] Array-basierter LocalStorage für mehrere Rechnungen
+- [x] Navigation zwischen Liste und Einzelansicht
+
+**Komponente**:
+- InvoicesListPage.tsx - Übersicht aller Rechnungen
+
+**Features**:
+- **Rechnungsliste**: Tabelle mit allen Rechnungen
+  - Rechnungsnummer, Datum, Kunde, Netto, Brutto, Status
+- **Suche**: Nach Rechnungsnummer, Kunde oder Datum
+- **Sortierung**: Nach Datum (neueste zuerst)
+- **Status-Badges**: Farbcodiert (Entwurf, Versendet, Bezahlt, Storniert)
+- **Aktionen pro Rechnung**:
+  - Bearbeiten (navigate to /invoice/:id)
+  - Duplizieren (erstellt Kopie mit neuem Datum)
+  - Drucken (navigate und trigger print)
+  - Löschen (mit Bestätigung)
+- **Navigation**:
+  - /invoices - Liste aller Rechnungen
+  - /invoice/new - Neue Rechnung erstellen
+  - /invoice/:id - Bestehende Rechnung bearbeiten
+
+**Datenmodell-Erweiterungen**:
+- InvoiceStatus Type: 'draft' | 'sent' | 'paid' | 'cancelled'
+- Invoice.status Field (optional für Rückwärtskompatibilität)
+- STORAGE_KEYS.INVOICES für Array von Rechnungen
+
+**InvoicePage Anpassungen**:
+- URL-Parameter Support (:invoiceId)
+- Laden/Speichern aus/in Rechnungs-Array
+- Status-Auswahl Dropdown
+- Zurück-Navigation zur Liste
+- "Speichern und Zurück"-Verhalten
+
+**Export/Import Update**:
+- ExportData v2.0.0 mit invoices Array
+- Rückwärtskompatibilität mit v1.0.0 (currentInvoice)
+- Migration von einzelner Rechnung zu Array beim Import
+
+---
+
+### ✅ Schritt 13: PDF Export (ERLEDIGT)
+- [x] PDF-Export-Button auf Rechnungsseite
+- [x] Direkter PDF-Download ohne Browser-Druckdialog
+- [x] Automatische Dateinamen-Generierung
+- [x] Professional PDF-Formatierung
+
+**Utility**:
+- pdfExport.ts - PDF-Generierung mit jsPDF und html2canvas
+
+**Libraries**:
+- jsPDF - PDF-Generierung
+- html2canvas - HTML zu Canvas Konvertierung
+
+**Features**:
+- **"Als PDF" Button**: Auf Rechnungsseite neben "Drucken"
+- **Konvertierung**: InvoicePrintView HTML → Canvas → PDF
+- **Format**: A4, Portrait, automatische Seitenumbrüche
+- **Qualität**: Scale 2 für hohe Auflösung
+- **Dateiname**: RE-{invoiceNumber}-{customerName}.pdf
+- **Deaktiviert**: Wenn Rechnung keine Nummer oder Kunde hat
+- **Fehlerbehandlung**: User-Feedback bei Fehlern
+
+**Technische Details**:
+- html2canvas rendert DOM-Element als Canvas
+- jsPDF erstellt PDF aus Canvas-Image
+- Automatische Berechnung von Seitenhöhen
+- Multi-Page Support für lange Rechnungen
+- Filename-Sanitization (entfernt Sonderzeichen)
+
+---
+
 ## Akzeptanzkriterien (Definition of Done)
 
 - [x] Projekt läuft und ist navigierbar
@@ -435,10 +567,17 @@ export default defineConfig({
 - [x] Leistungsliste editierbar und persistent (LocalStorage)
 - [x] Firmenstammdaten editierbar und persistent (LocalStorage)
 - [x] Export/Import aller Daten als JSON-Backup funktioniert
+- [x] CSV-Importvorlagen downloadbar für Kunden und Leistungen
+- [x] CSV Import für Kunden mit Validierung und Vorschau
+- [x] CSV Import für Leistungen mit Validierung und Vorschau
+- [x] Rechnungshistorie mit Liste aller Rechnungen
+- [x] Rechnungsstatus-Verwaltung (Entwurf, Versendet, Bezahlt, Storniert)
+- [x] Suche und Filter in Rechnungsliste
 - [x] Rechnung: Kunde + Leistungen auswählbar, Stunden eingeben
 - [x] Summen korrekt berechnet (Netto/Steuer/Brutto)
-- [x] Rechnung als JSON speicherbar und wieder ladbar
+- [x] Rechnungen als Array speicherbar (mehrere Rechnungen)
 - [x] Druck funktioniert mit Firmendaten, Zahlungsbedingungen, Bankverbindung
+- [x] PDF-Export direkt aus der Anwendung
 - [x] Hilfe & Anleitung vollständig und verständlich
 - [x] Code ist gut strukturiert und verständlich (Schulungszweck)
 - [x] README dokumentiert alle Features
@@ -450,29 +589,34 @@ export default defineConfig({
 ```
 src/
 ├── app/
-│   └── Layout.tsx              # App-Layout mit Tab-Navigation + Hilfe-Button
+│   └── Layout.tsx                  # App-Layout mit Tab-Navigation + Hilfe-Button
 ├── pages/
-│   ├── SettingsPage.tsx        # Firmenstammdaten + Datensicherung
-│   ├── CustomersPage.tsx       # Kundenverwaltung
-│   ├── ServicesPage.tsx        # Leistungsverwaltung
-│   ├── InvoicePage.tsx         # Rechnungsformular
-│   └── HelpPage.tsx            # Hilfe & Anleitung (NEU)
+│   ├── SettingsPage.tsx            # Firmenstammdaten + Datensicherung
+│   ├── CustomersPage.tsx           # Kundenverwaltung mit CSV Import
+│   ├── ServicesPage.tsx            # Leistungsverwaltung mit CSV Import
+│   ├── InvoicesListPage.tsx        # Rechnungsübersicht (NEU)
+│   ├── InvoicePage.tsx             # Rechnungsformular (bearbeitet: URL-Params, Status)
+│   └── HelpPage.tsx                # Hilfe & Anleitung
 ├── components/
-│   ├── CustomerFormModal.tsx   # Kunde hinzufügen/bearbeiten
-│   ├── ServiceFormModal.tsx    # Leistung hinzufügen/bearbeiten
-│   ├── ConfirmDeleteModal.tsx  # Bestätigungsdialog
-│   └── InvoicePrintView.tsx    # Druckansicht mit Firmendaten
+│   ├── CustomerFormModal.tsx       # Kunde hinzufügen/bearbeiten
+│   ├── ServiceFormModal.tsx        # Leistung hinzufügen/bearbeiten
+│   ├── CustomerCSVImportModal.tsx  # CSV Import für Kunden (NEU)
+│   ├── ServiceCSVImportModal.tsx   # CSV Import für Leistungen (NEU)
+│   ├── ConfirmDeleteModal.tsx      # Bestätigungsdialog
+│   └── InvoicePrintView.tsx        # Druckansicht mit Firmendaten
 ├── models/
-│   └── types.ts                # TypeScript Datenmodelle
+│   └── types.ts                    # TypeScript Datenmodelle + InvoiceStatus
 ├── storage/
-│   └── localStorage.ts         # LocalStorage Helper
+│   └── localStorage.ts             # LocalStorage Helper (INVOICES Key)
 ├── utils/
-│   ├── money.ts                # Geld-Formatierung
-│   ├── calc.ts                 # Rechnungs-Berechnungen
-│   └── dataExport.ts           # Export/Import Utilities
-├── print.css                   # Print Styles
-├── App.tsx                     # Root Component
-└── main.tsx                    # Entry Point
+│   ├── money.ts                    # Geld-Formatierung
+│   ├── calc.ts                     # Rechnungs-Berechnungen
+│   ├── dataExport.ts               # Export/Import Utilities (v2.0.0)
+│   ├── csvTemplates.ts             # CSV-Vorlagen Download (NEU)
+│   └── pdfExport.ts                # PDF-Generierung (NEU)
+├── print.css                       # Print Styles
+├── App.tsx                         # Root Component (Routes aktualisiert)
+└── main.tsx                        # Entry Point
 ```
 
 ---
@@ -480,25 +624,30 @@ src/
 ## Lernziele für Teilnehmer
 
 1. **React Grundlagen**: Komponenten, Props, State, Hooks
-2. **TypeScript**: Typisierung, Interfaces, Type Safety
+2. **TypeScript**: Typisierung, Interfaces, Type Safety, Union Types
 3. **State Management**: useState, useEffect, Daten-Flow
-4. **Formular-Handling**: Controlled Components, Validation, Lokalisierung (Komma-Eingabe)
-5. **UI Library nutzen**: Mantine Components, Responsive Design
-6. **Browser APIs**: LocalStorage, FileReader, Blob/URL, window.print()
-7. **Berechnungslogik**: Funktionen auslagern, testen
-8. **Code-Organisation**: Ordnerstruktur, Separation of Concerns
-9. **Import/Export Pattern**: JSON-Backup für Client-Only Apps
-10. **Build-Optimierung**: Single-File Build, Production-ready Output
-11. **Internationalisierung**: Zahlenformate, Länder-Defaults
-12. **Dokumentation**: Benutzerfreundliche Hilfe-Seiten erstellen
+4. **Routing**: React Router v6, URL-Parameter, Navigation
+5. **Formular-Handling**: Controlled Components, Validation, Lokalisierung (Komma-Eingabe)
+6. **UI Library nutzen**: Mantine Components, Responsive Design, Modals
+7. **Browser APIs**: LocalStorage, FileReader, Blob/URL, window.print(), Canvas API
+8. **File Handling**: CSV Parsing, File Upload, Download-Generierung
+9. **PDF Generation**: HTML zu Canvas zu PDF Konvertierung
+10. **Berechnungslogik**: Funktionen auslagern, testen
+11. **Code-Organisation**: Ordnerstruktur, Separation of Concerns
+12. **Import/Export Pattern**: JSON-Backup für Client-Only Apps, CSV-Import/Export
+13. **Build-Optimierung**: Single-File Build, Production-ready Output
+14. **Internationalisierung**: Zahlenformate, Länder-Defaults
+15. **Dokumentation**: Benutzerfreundliche Hilfe-Seiten erstellen
+16. **Datenmodellierung**: Status-Management, Array-basierte Persistierung
+17. **Third-Party Libraries**: Integration von papaparse, jsPDF, html2canvas
 
 ---
 
 ## Projekt-Zusammenfassung
 
-**Status**: ✅ VOLLSTÄNDIG ABGESCHLOSSEN
+**Status**: ✅ VOLLSTÄNDIG ABGESCHLOSSEN + ERWEITERT
 
-Alle 9 Entwicklungsschritte wurden erfolgreich implementiert:
+Alle 13 Entwicklungsschritte wurden erfolgreich implementiert:
 - ✅ Schritt 1: Projekt-Setup + Navigation
 - ✅ Schritt 2: Kundenverwaltung (CRUD)
 - ✅ Schritt 3: Leistungsverwaltung (CRUD)
@@ -508,6 +657,10 @@ Alle 9 Entwicklungsschritte wurden erfolgreich implementiert:
 - ✅ Schritt 7: Firmenstammdaten / Einstellungen + Export/Import
 - ✅ Schritt 8: Hilfe & Anleitung
 - ✅ Schritt 9: Single-File Build + Komma-Eingabe
+- ✅ Schritt 10: CSV-Importvorlagen
+- ✅ Schritt 11: CSV Import für Kunden und Leistungen
+- ✅ Schritt 12: Rechnungshistorie und Verwaltung
+- ✅ Schritt 13: PDF Export
 
 **Alle Akzeptanzkriterien erfüllt** ✅
 
@@ -515,26 +668,37 @@ Alle 9 Entwicklungsschritte wurden erfolgreich implementiert:
 
 1. **Saubere Architektur**: Separation of Concerns (Pages, Components, Utils, Models)
 2. **Type-Safe**: Vollständige TypeScript Typisierung
-3. **Wiederverwendbare Komponenten**: Modals, Form Components
-4. **Utility Functions**: money.ts, calc.ts, dataExport.ts für Berechnungen & Backup
-5. **LocalStorage Integration**: Persistierung aller Daten
-6. **Export/Import System**: Backup und Migration zwischen Browsern/Rechnern
-7. **Browser APIs**: File Download, FileReader, Blob/URL handling
-8. **Responsive UI**: Mantine Components
-9. **Print-Optimierung**: CSS @media print für professionellen Druck mit Firmendaten
-10. **Code-Qualität**: ESLint Integration
-11. **Benutzerfreundlichkeit**: Umfassende Hilfe & Anleitung integriert
-12. **Lokalisierung**: Österreichische Defaults, Deutsche Zahlenformatierung (Komma)
-13. **Single-File Build**: Optimiert für einfaches Deployment (nur 1 HTML-Datei)
+3. **Wiederverwendbare Komponenten**: Modals, Form Components, CSV Import Components
+4. **Utility Functions**: money.ts, calc.ts, dataExport.ts, csvTemplates.ts, pdfExport.ts
+5. **LocalStorage Integration**: Persistierung aller Daten (Kunden, Leistungen, Rechnungen, Einstellungen)
+6. **Export/Import System**: Backup und Migration zwischen Browsern/Rechnern (v2.0.0 mit Rechnungsarray)
+7. **CSV Import/Export**: Vorlagen-Download und Batch-Import mit Validierung
+8. **PDF Generation**: Direkter PDF-Export mit jsPDF und html2canvas
+9. **Browser APIs**: File Download, FileReader, Blob/URL handling, Canvas API
+10. **Responsive UI**: Mantine Components
+11. **Print-Optimierung**: CSS @media print für professionellen Druck mit Firmendaten
+12. **Rechnungshistorie**: Vollständige Verwaltung mit Suche, Filter, Status-Tracking
+13. **Code-Qualität**: ESLint Integration
+14. **Benutzerfreundlichkeit**: Umfassende Hilfe & Anleitung integriert
+15. **Lokalisierung**: Österreichische Defaults, Deutsche Zahlenformatierung (Komma)
+16. **Single-File Build**: Optimiert für einfaches Deployment (nur 1 HTML-Datei)
 
 ### Statistik
 
-- **Seiten**: 5 (Einstellungen, Kunden, Leistungen, Rechnung, Hilfe)
-- **Komponenten**: 4 wiederverwendbare Components
-- **Utils**: 4 Utility-Module (money, calc, dataExport, localStorage)
-- **Datenmodelle**: 6 TypeScript Interfaces (Customer, Service, Invoice, InvoiceLine, CompanySettings, ExportData)
-- **Dependencies**: Minimal (React, Mantine, Router, ESLint, vite-plugin-singlefile)
-- **Build Output**: Single-File (nur index.html) - 661.58 kB (gzip: 171.58 kB)
+- **Seiten**: 6 (Einstellungen, Kunden, Leistungen, Rechnungsübersicht, Rechnungsformular, Hilfe)
+- **Komponenten**: 7 wiederverwendbare Components
+  - CustomerFormModal, ServiceFormModal, ConfirmDeleteModal, InvoicePrintView
+  - CustomerCSVImportModal, ServiceCSVImportModal (NEU)
+- **Utils**: 6 Utility-Module
+  - money, calc, dataExport, localStorage
+  - csvTemplates, pdfExport (NEU)
+- **Datenmodelle**: 7 TypeScript Interfaces
+  - Customer, Service, Invoice, InvoiceLine, InvoiceStatus (NEU), CompanySettings, ExportData
+- **Dependencies**:
+  - Core: React, Mantine, React Router, TypeScript
+  - Tools: ESLint, vite-plugin-singlefile
+  - Libraries: papaparse, jsPDF, html2canvas (NEU)
+- **Build Output**: Single-File (nur index.html) - ~700 kB (gzip: ~180 kB)
   - Alle CSS und JavaScript inline eingebettet
   - Keine separaten Asset-Dateien
   - Einfach zu deployen: nur 1 Datei
@@ -565,13 +729,18 @@ npm run lint
 
 ### Nächste Schritte (Optional für erweiterte Schulung)
 
-1. **Testing**: Unit Tests für calc.ts, money.ts und dataExport.ts mit Vitest
-2. **PDF Export**: Bibliothek wie jsPDF oder Puppeteer integrieren für direkte PDF-Generierung
-3. **Mehrere Rechnungen**: Liste aller Rechnungen verwalten (Rechnungshistorie)
-4. **Validierung**: Zod für Schema-Validierung bei Export/Import
-5. **State Management**: Zustand für globalen State (ersetzt LocalStorage direkt)
-6. **Mehrsprachigkeit**: i18n Support für Deutsch/Englisch
-7. **Email-Versand**: Integration für Rechnungsversand per Email
-8. **Rechnungsvorlagen**: Verschiedene Design-Templates zur Auswahl
-9. **Wiederkehrende Rechnungen**: Templates für regelmäßige Abrechnungen
-10. **Statistiken**: Dashboard mit Umsatzübersicht und Kundenstatistiken
+1. **Testing**: Unit Tests für calc.ts, money.ts, dataExport.ts, csvTemplates.ts, pdfExport.ts mit Vitest
+2. **Validierung**: Zod für Schema-Validierung bei Export/Import und CSV-Import
+3. **State Management**: Zustand für globalen State (ersetzt LocalStorage direkt)
+4. **Mehrsprachigkeit**: i18n Support für Deutsch/Englisch
+5. **Email-Versand**: Integration für Rechnungsversand per Email
+6. **Rechnungsvorlagen**: Verschiedene Design-Templates zur Auswahl
+7. **Wiederkehrende Rechnungen**: Templates für regelmäßige Abrechnungen
+8. **Statistiken**: Dashboard mit Umsatzübersicht und Kundenstatistiken
+9. **Zahlungserinnerungen**: Automatische Verfolgung überfälliger Rechnungen
+10. **Angebote**: Erstellung von Angeboten zusätzlich zu Rechnungen
+11. **Mehrere Währungen**: Support für verschiedene Währungen
+12. **Rechnungsnummern-Generator**: Automatische Vergabe von Rechnungsnummern
+13. **Projektverwaltung**: Gruppierung von Rechnungen nach Projekten
+14. **Zeiterfassung**: Integration von Stundenerfassung für Leistungen
+15. **Cloud-Sync**: Optional mit Backend für Geräte-Synchronisation
