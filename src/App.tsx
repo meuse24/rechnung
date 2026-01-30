@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './app/Layout';
 import { CustomersPage } from './pages/CustomersPage';
 import { ServicesPage } from './pages/ServicesPage';
+import { InvoicesListPage } from './pages/InvoicesListPage';
 import { InvoicePage } from './pages/InvoicePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
@@ -18,7 +19,8 @@ function App() {
             <Route index element={<SettingsPage />} />
             <Route path="customers" element={<CustomersPage />} />
             <Route path="services" element={<ServicesPage />} />
-            <Route path="invoice" element={<InvoicePage />} />
+            <Route path="invoices" element={<InvoicesListPage />} />
+            <Route path="invoice/:invoiceId" element={<InvoicePage />} />
             <Route path="help" element={<HelpPage />} />
           </Route>
         </Routes>

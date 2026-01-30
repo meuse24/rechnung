@@ -25,6 +25,8 @@ export interface InvoiceLine {
   note?: string;
 }
 
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';
+
 export interface Invoice {
   id: string;
   invoiceNumber: string;
@@ -32,6 +34,7 @@ export interface Invoice {
   customerId: string;
   lines: InvoiceLine[];
   notes?: string;
+  status?: InvoiceStatus; // Optional für Rückwärtskompatibilität
 }
 
 export interface CompanySettings {

@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   CUSTOMERS: 'invoice_customers',
   SERVICES: 'invoice_services',
   CURRENT_INVOICE: 'invoice_current',
+  INVOICES: 'invoice_invoices', // Array aller Rechnungen
   COMPANY_SETTINGS: 'invoice_company_settings',
 } as const;
 

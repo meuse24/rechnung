@@ -10,7 +10,7 @@ export function Layout() {
     if (location.pathname === '/') return 'settings';
     if (location.pathname.startsWith('/customers')) return 'customers';
     if (location.pathname.startsWith('/services')) return 'services';
-    if (location.pathname.startsWith('/invoice')) return 'invoice';
+    if (location.pathname.startsWith('/invoice')) return 'invoices';
     return 'settings';
   };
 
@@ -18,7 +18,7 @@ export function Layout() {
     if (value === 'settings') navigate('/');
     else if (value === 'customers') navigate('/customers');
     else if (value === 'services') navigate('/services');
-    else if (value === 'invoice') navigate('/invoice');
+    else if (value === 'invoices') navigate('/invoices');
   };
 
   return (
@@ -38,7 +38,7 @@ export function Layout() {
               <Tabs.Tab value="settings">Einstellungen</Tabs.Tab>
               <Tabs.Tab value="customers">Kunden</Tabs.Tab>
               <Tabs.Tab value="services">Leistungen</Tabs.Tab>
-              <Tabs.Tab value="invoice">Rechnung</Tabs.Tab>
+              <Tabs.Tab value="invoices">Rechnungen</Tabs.Tab>
             </Tabs.List>
           </Tabs>
 

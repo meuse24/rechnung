@@ -20,17 +20,28 @@ import {
   IconPlus,
   IconTrash,
   IconDeviceFloppy,
-  IconFileDownload,
   IconPrinter,
   IconInfoCircle,
+  IconArrowLeft,
 } from '@tabler/icons-react';
-import { Customer, Service, Invoice, InvoiceLine, CompanySettings } from '@/models/types';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import {
+  Customer,
+  Service,
+  Invoice,
+  InvoiceLine,
+  CompanySettings,
+  InvoiceStatus,
+} from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
 import { InvoicePrintView } from '@/components/InvoicePrintView';
 
 export function InvoicePage() {
+  const { invoiceId } = useParams<{ invoiceId: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [companySettings, setCompanySettings] = useState<CompanySettings | undefined>(
@@ -43,9 +54,10 @@ export function InvoicePage() {
     customerId: '',
     lines: [],
     notes: '',
+    status: 'draft',
   });
 
-  // Laden von Stammdaten beim Mount
+  // Laden von Stammdaten und Rechnung beim Mount
   useEffect(() => {
     const loadedCustomers = loadFromStorage<Customer[]>(STORAGE_KEYS.CUSTOMERS, []);
     const loadedServices = loadFromStorage<Service[]>(STORAGE_KEYS.SERVICES, []);
@@ -57,14 +69,24 @@ export function InvoicePage() {
     setServices(loadedServices);
     setCompanySettings(loadedSettings);
 
-    // Versuche gespeicherte Rechnung zu laden
-    const savedInvoice = loadFromStorage<Invoice | null>(STORAGE_KEYS.CURRENT_INVOICE, null);
-    if (savedInvoice) {
-      setInvoice(savedInvoice);
+    // Rechnung laden wenn ID vorhanden und nicht "new"
+    if (invoiceId && invoiceId !== 'new') {
+      const allInvoices = loadFromStorage<Invoice[]>(STORAGE_KEYS.INVOICES, []);
+      const existing = allInvoices.find((inv) => inv.id === invoiceId);
+      if (existing) {
+        setInvoice(existing);
+      } else {
+        alert('Rechnung nicht gefunden.');
+        navigate('/invoices');
+      }
     }
-  }, []);
 
-  // Position hinzufügen
+    // Trigger print if requested from InvoicesList
+    if (location.state?.print) {
+      setTimeout(() => window.print(), 100);
+    }
+  }, [invoiceId, navigate, location]);
+
   const addLine = () => {
     setInvoice({
       ...invoice,
@@ -79,20 +101,17 @@ export function InvoicePage() {
     });
   };
 
-  // Position entfernen
   const removeLine = (index: number) => {
     const newLines = invoice.lines.filter((_, i) => i !== index);
     setInvoice({ ...invoice, lines: newLines });
   };
 
-  // Position aktualisieren
   const updateLine = (index: number, field: keyof InvoiceLine, value: string | number) => {
     const newLines = [...invoice.lines];
     newLines[index] = { ...newLines[index], [field]: value };
     setInvoice({ ...invoice, lines: newLines });
   };
 
-  // Rechnung speichern
   const handleSave = () => {
     if (!invoice.invoiceNumber || !invoice.customerId) {
       alert('Bitte Rechnungsnummer und Kunde auswählen.');
@@ -104,36 +123,28 @@ export function InvoicePage() {
       return;
     }
 
-    saveToStorage(STORAGE_KEYS.CURRENT_INVOICE, invoice);
-    alert('Rechnung wurde gespeichert.');
-  };
+    const allInvoices = loadFromStorage<Invoice[]>(STORAGE_KEYS.INVOICES, []);
+    const existingIndex = allInvoices.findIndex((inv) => inv.id === invoice.id);
 
-  // Rechnung laden
-  const handleLoad = () => {
-    const savedInvoice = loadFromStorage<Invoice | null>(STORAGE_KEYS.CURRENT_INVOICE, null);
-    if (savedInvoice) {
-      setInvoice(savedInvoice);
-      alert('Rechnung wurde geladen.');
+    if (existingIndex >= 0) {
+      // Update existing
+      allInvoices[existingIndex] = invoice;
     } else {
-      alert('Keine gespeicherte Rechnung gefunden.');
+      // Add new
+      allInvoices.push(invoice);
     }
+
+    saveToStorage(STORAGE_KEYS.INVOICES, allInvoices);
+    alert('Rechnung wurde gespeichert.');
+    navigate('/invoices');
   };
 
-  // Neue Rechnung
-  const handleNew = () => {
-    setInvoice({
-      id: crypto.randomUUID(),
-      invoiceNumber: '',
-      issueDate: new Date().toISOString().split('T')[0],
-      customerId: '',
-      lines: [],
-      notes: '',
-    });
-  };
-
-  // Drucken
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleBack = () => {
+    navigate('/invoices');
   };
 
   // Berechnungen
@@ -150,25 +161,34 @@ export function InvoicePage() {
     label: `${s.name} (${formatCurrency(s.hourlyRate)}/h)`,
   }));
 
+  const statusOptions: { value: InvoiceStatus; label: string }[] = [
+    { value: 'draft', label: 'Entwurf' },
+    { value: 'sent', label: 'Versendet' },
+    { value: 'paid', label: 'Bezahlt' },
+    { value: 'cancelled', label: 'Storniert' },
+  ];
+
   const hasData = customers.length > 0 && services.length > 0;
+  const isNew = invoiceId === 'new' || !invoiceId;
 
   return (
     <Container size="lg" py="xl" className="invoice-page">
       <Stack gap="lg">
         <Group justify="space-between">
-          <Title order={1}>Rechnung erstellen</Title>
           <Group gap="xs">
-            <Button variant="default" size="sm" onClick={handleNew}>
-              Neu
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              leftSection={<IconFileDownload size={16} />}
-              onClick={handleLoad}
+            <ActionIcon
+              variant="subtle"
+              size="lg"
+              onClick={handleBack}
+              className="no-print"
             >
-              Laden
-            </Button>
+              <IconArrowLeft size={20} />
+            </ActionIcon>
+            <Title order={1}>
+              {isNew ? 'Neue Rechnung' : 'Rechnung bearbeiten'}
+            </Title>
+          </Group>
+          <Group gap="xs" className="no-print">
             <Button
               variant="filled"
               size="sm"
@@ -182,7 +202,6 @@ export function InvoicePage() {
               size="sm"
               leftSection={<IconPrinter size={16} />}
               onClick={handlePrint}
-              className="no-print"
             >
               Drucken
             </Button>
@@ -214,6 +233,14 @@ export function InvoicePage() {
                 required
                 value={invoice.issueDate}
                 onChange={(e) => setInvoice({ ...invoice, issueDate: e.target.value })}
+              />
+              <Select
+                label="Status"
+                data={statusOptions}
+                value={invoice.status || 'draft'}
+                onChange={(value) =>
+                  setInvoice({ ...invoice, status: (value as InvoiceStatus) || 'draft' })
+                }
               />
             </Group>
 

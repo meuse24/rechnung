@@ -11,7 +11,8 @@ export interface ExportData {
   customers: Customer[];
   services: Service[];
   companySettings: CompanySettings | null;
-  currentInvoice: Invoice | null;
+  invoices: Invoice[]; // Changed from currentInvoice to invoices array
+  currentInvoice?: Invoice | null; // Kept for backwards compatibility
 }
 
 /**
@@ -24,18 +25,15 @@ export function exportAllData(): ExportData {
     STORAGE_KEYS.COMPANY_SETTINGS,
     null
   );
-  const currentInvoice = loadFromStorage<Invoice | null>(
-    STORAGE_KEYS.CURRENT_INVOICE,
-    null
-  );
+  const invoices = loadFromStorage<Invoice[]>(STORAGE_KEYS.INVOICES, []);
 
   return {
-    version: '1.0.0',
+    version: '2.0.0',
     exportDate: new Date().toISOString(),
     customers,
     services,
     companySettings,
-    currentInvoice,
+    invoices,
   };
 }
 
@@ -89,8 +87,14 @@ export function importAllData(data: ExportData): void {
     saveToStorage(STORAGE_KEYS.COMPANY_SETTINGS, data.companySettings);
   }
 
-  if (data.currentInvoice) {
-    saveToStorage(STORAGE_KEYS.CURRENT_INVOICE, data.currentInvoice);
+  // Import invoices array (new format)
+  if (data.invoices && Array.isArray(data.invoices)) {
+    saveToStorage(STORAGE_KEYS.INVOICES, data.invoices);
+  }
+
+  // Backwards compatibility: import old currentInvoice as single invoice
+  if (data.currentInvoice && (!data.invoices || data.invoices.length === 0)) {
+    saveToStorage(STORAGE_KEYS.INVOICES, [data.currentInvoice]);
   }
 }
 
