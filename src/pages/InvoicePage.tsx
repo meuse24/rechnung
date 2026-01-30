@@ -188,11 +188,28 @@ export function InvoicePage() {
       return;
     }
 
-    const customerName = selectedCustomer?.name || 'Unbekannt';
+    const customerName = invoice.customerSnapshot?.name || selectedCustomer?.name || 'Unbekannt';
     const filename = generatePDFFilename(invoice.invoiceNumber, customerName);
 
     try {
+      // Temporarily make element visible for html2canvas
+      const originalDisplay = printElement.style.display;
+      const originalPosition = printElement.style.position;
+      const originalLeft = printElement.style.left;
+
+      printElement.style.display = 'block';
+      printElement.style.position = 'fixed';
+      printElement.style.left = '-9999px';
+      printElement.style.top = '0';
+
+      // Generate PDF
       await generatePDF(printElement, filename);
+
+      // Restore original styles
+      printElement.style.display = originalDisplay;
+      printElement.style.position = originalPosition;
+      printElement.style.left = originalLeft;
+      printElement.style.top = '';
     } catch (error) {
       alert('Fehler beim Erstellen der PDF-Datei.');
       console.error(error);
