@@ -1,0 +1,226 @@
+import { Paper, Text, Table, Divider, Stack, Group } from '@mantine/core';
+import { Invoice, Customer, Service, CompanySettings } from '@/models/types';
+import { calculateInvoiceTotals } from '@/utils/calc';
+import { formatCurrency } from '@/utils/money';
+
+interface InvoicePrintViewProps {
+  invoice: Invoice;
+  customer: Customer | undefined;
+  services: Service[];
+  companySettings: CompanySettings | undefined;
+}
+
+export function InvoicePrintView({
+  invoice,
+  customer,
+  services,
+  companySettings,
+}: InvoicePrintViewProps) {
+  const totals = calculateInvoiceTotals(invoice, services);
+  const serviceMap = new Map(services.map((s) => [s.id, s]));
+
+  if (!customer) {
+    return null;
+  }
+
+  return (
+    <Paper className="print-only" p="xl" style={{ maxWidth: 800, margin: '0 auto' }}>
+      <Stack gap="xl">
+        {/* Firmenkopf / Absender */}
+        {companySettings && companySettings.companyName && (
+          <div>
+            <Text size="xl" fw={700}>
+              {companySettings.companyName}
+            </Text>
+            <Text size="sm">{companySettings.addressLine1}</Text>
+            {companySettings.addressLine2 && (
+              <Text size="sm">{companySettings.addressLine2}</Text>
+            )}
+            <Text size="sm">
+              {companySettings.postalCode} {companySettings.city}
+            </Text>
+            {companySettings.phone && <Text size="sm">Tel: {companySettings.phone}</Text>}
+            {companySettings.email && <Text size="sm">E-Mail: {companySettings.email}</Text>}
+            {companySettings.website && <Text size="sm">{companySettings.website}</Text>}
+
+            <Group gap="xl" mt="xs">
+              {companySettings.taxId && (
+                <Text size="xs" c="dimmed">
+                  Steuernr.: {companySettings.taxId}
+                </Text>
+              )}
+              {companySettings.vatId && (
+                <Text size="xs" c="dimmed">
+                  USt-IdNr.: {companySettings.vatId}
+                </Text>
+              )}
+            </Group>
+          </div>
+        )}
+
+        <Divider my="md" />
+
+        {/* Header */}
+        <div>
+          <Text size="xl" fw={700} mb="xs">
+            RECHNUNG
+          </Text>
+          <Group justify="space-between">
+            <div>
+              <Text size="sm" c="dimmed">
+                Rechnungsnummer
+              </Text>
+              <Text fw={600}>{invoice.invoiceNumber}</Text>
+            </div>
+            <div>
+              <Text size="sm" c="dimmed">
+                Datum
+              </Text>
+              <Text fw={600}>{invoice.issueDate}</Text>
+            </div>
+          </Group>
+        </div>
+
+        <Divider />
+
+        {/* Kundendetails */}
+        <div>
+          <Text size="sm" c="dimmed" mb="xs">
+            Rechnungsempfänger
+          </Text>
+          <Text fw={600}>{customer.name}</Text>
+          <Text size="sm">{customer.addressLine1}</Text>
+          <Text size="sm">
+            {customer.postalCode} {customer.city}
+          </Text>
+          <Text size="sm">{customer.countryCode}</Text>
+          {customer.email && <Text size="sm">{customer.email}</Text>}
+        </div>
+
+        <Divider />
+
+        {/* Positionen */}
+        <div>
+          <Text fw={600} mb="md">
+            Leistungen
+          </Text>
+          <Table>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Beschreibung</Table.Th>
+                <Table.Th style={{ textAlign: 'right' }}>Stunden</Table.Th>
+                <Table.Th style={{ textAlign: 'right' }}>Stundensatz</Table.Th>
+                <Table.Th style={{ textAlign: 'right' }}>MwSt.</Table.Th>
+                <Table.Th style={{ textAlign: 'right' }}>Betrag</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {invoice.lines.map((line, index) => {
+                const service = serviceMap.get(line.serviceId);
+                const lineCalc = totals.lines[index];
+
+                if (!service || !lineCalc) return null;
+
+                return (
+                  <Table.Tr key={index}>
+                    <Table.Td>
+                      <Text fw={500}>{service.name}</Text>
+                      {line.note && (
+                        <Text size="xs" c="dimmed">
+                          {line.note}
+                        </Text>
+                      )}
+                    </Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>{line.hours}</Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>
+                      {formatCurrency(service.hourlyRate)}
+                    </Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>{service.taxRate}%</Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>
+                      {formatCurrency(lineCalc.netAmount)}
+                    </Table.Td>
+                  </Table.Tr>
+                );
+              })}
+            </Table.Tbody>
+          </Table>
+        </div>
+
+        <Divider />
+
+        {/* Summen */}
+        <div style={{ marginLeft: 'auto', width: 300 }}>
+          <Stack gap="xs">
+            <Group justify="space-between">
+              <Text>Nettobetrag:</Text>
+              <Text>{formatCurrency(totals.netTotal)}</Text>
+            </Group>
+            <Group justify="space-between">
+              <Text>Mehrwertsteuer:</Text>
+              <Text>{formatCurrency(totals.taxTotal)}</Text>
+            </Group>
+            <Divider />
+            <Group justify="space-between">
+              <Text fw={700} size="lg">
+                Gesamtbetrag:
+              </Text>
+              <Text fw={700} size="lg">
+                {formatCurrency(totals.grossTotal)}
+              </Text>
+            </Group>
+          </Stack>
+        </div>
+
+        {/* Notizen */}
+        {invoice.notes && (
+          <>
+            <Divider />
+            <div>
+              <Text size="sm" c="dimmed" mb="xs">
+                Hinweise
+              </Text>
+              <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                {invoice.notes}
+              </Text>
+            </div>
+          </>
+        )}
+
+        {/* Zahlungsbedingungen */}
+        {companySettings && companySettings.paymentTerms && (
+          <>
+            <Divider />
+            <div>
+              <Text size="sm" c="dimmed" mb="xs">
+                Zahlungsbedingungen
+              </Text>
+              <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                {companySettings.paymentTerms}
+              </Text>
+            </div>
+          </>
+        )}
+
+        {/* Bankverbindung */}
+        {companySettings && companySettings.iban && (
+          <>
+            <Divider />
+            <div>
+              <Text size="sm" c="dimmed" mb="xs">
+                Bankverbindung
+              </Text>
+              {companySettings.bankName && (
+                <Text size="sm">Bank: {companySettings.bankName}</Text>
+              )}
+              {companySettings.accountHolder && (
+                <Text size="sm">Kontoinhaber: {companySettings.accountHolder}</Text>
+              )}
+              <Text size="sm">IBAN: {companySettings.iban}</Text>
+              {companySettings.bic && <Text size="sm">BIC: {companySettings.bic}</Text>}
+            </div>
+          </>
+        )}
+      </Stack>
+    </Paper>
+  );
+}
