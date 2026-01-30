@@ -33,6 +33,7 @@ import {
   InvoiceLine,
   CompanySettings,
   InvoiceStatus,
+  CustomerSnapshot,
 } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { calculateInvoiceTotals } from '@/utils/calc';
@@ -114,6 +115,38 @@ export function InvoicePage() {
     setInvoice({ ...invoice, lines: newLines });
   };
 
+  const createInvoiceSnapshot = (): Invoice => {
+    // Create customer snapshot
+    const customer = customers.find((c) => c.id === invoice.customerId);
+    const customerSnapshot: CustomerSnapshot | undefined = customer
+      ? {
+          name: customer.name,
+          addressLine1: customer.addressLine1,
+          postalCode: customer.postalCode,
+          city: customer.city,
+          countryCode: customer.countryCode,
+          email: customer.email,
+        }
+      : undefined;
+
+    // Create line snapshots
+    const linesWithSnapshots: InvoiceLine[] = invoice.lines.map((line) => {
+      const service = services.find((s) => s.id === line.serviceId);
+      return {
+        ...line,
+        description: service?.name,
+        hourlyRate: service?.hourlyRate,
+        taxRate: service?.taxRate,
+      };
+    });
+
+    return {
+      ...invoice,
+      customerSnapshot,
+      lines: linesWithSnapshots,
+    };
+  };
+
   const handleSave = () => {
     if (!invoice.invoiceNumber || !invoice.customerId) {
       alert('Bitte Rechnungsnummer und Kunde auswählen.');
@@ -125,15 +158,18 @@ export function InvoicePage() {
       return;
     }
 
+    // Create immutable snapshot
+    const invoiceWithSnapshot = createInvoiceSnapshot();
+
     const allInvoices = loadFromStorage<Invoice[]>(STORAGE_KEYS.INVOICES, []);
     const existingIndex = allInvoices.findIndex((inv) => inv.id === invoice.id);
 
     if (existingIndex >= 0) {
       // Update existing
-      allInvoices[existingIndex] = invoice;
+      allInvoices[existingIndex] = invoiceWithSnapshot;
     } else {
       // Add new
-      allInvoices.push(invoice);
+      allInvoices.push(invoiceWithSnapshot);
     }
 
     saveToStorage(STORAGE_KEYS.INVOICES, allInvoices);

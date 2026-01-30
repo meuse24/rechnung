@@ -23,6 +23,19 @@ export interface InvoiceLine {
   serviceId: string;
   hours: number;
   note?: string;
+  // Snapshot fields (for immutability)
+  description?: string; // Service name at time of invoice creation
+  hourlyRate?: number; // Service hourly rate at time of invoice creation
+  taxRate?: number; // Service tax rate at time of invoice creation
+}
+
+export interface CustomerSnapshot {
+  name: string;
+  addressLine1: string;
+  postalCode: string;
+  city: string;
+  countryCode: string;
+  email?: string;
 }
 
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';
@@ -35,6 +48,7 @@ export interface Invoice {
   lines: InvoiceLine[];
   notes?: string;
   status?: InvoiceStatus; // Optional für Rückwärtskompatibilität
+  customerSnapshot?: CustomerSnapshot; // Customer data at time of invoice creation
 }
 
 export interface CompanySettings {

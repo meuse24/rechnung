@@ -19,7 +19,10 @@ export function InvoicePrintView({
   const totals = calculateInvoiceTotals(invoice, services);
   const serviceMap = new Map(services.map((s) => [s.id, s]));
 
-  if (!customer) {
+  // Use customer snapshot if available (for immutable invoices)
+  const displayCustomer = invoice.customerSnapshot || customer;
+
+  if (!displayCustomer) {
     return null;
   }
 
@@ -88,13 +91,13 @@ export function InvoicePrintView({
           <Text size="sm" c="dimmed" mb="xs">
             Rechnungsempfänger
           </Text>
-          <Text fw={600}>{customer.name}</Text>
-          <Text size="sm">{customer.addressLine1}</Text>
+          <Text fw={600}>{displayCustomer.name}</Text>
+          <Text size="sm">{displayCustomer.addressLine1}</Text>
           <Text size="sm">
-            {customer.postalCode} {customer.city}
+            {displayCustomer.postalCode} {displayCustomer.city}
           </Text>
-          <Text size="sm">{customer.countryCode}</Text>
-          {customer.email && <Text size="sm">{customer.email}</Text>}
+          <Text size="sm">{displayCustomer.countryCode}</Text>
+          {displayCustomer.email && <Text size="sm">{displayCustomer.email}</Text>}
         </div>
 
         <Divider />
@@ -116,15 +119,18 @@ export function InvoicePrintView({
             </Table.Thead>
             <Table.Tbody>
               {invoice.lines.map((line, index) => {
-                const service = serviceMap.get(line.serviceId);
                 const lineCalc = totals.lines[index];
+                if (!lineCalc) return null;
 
-                if (!service || !lineCalc) return null;
+                // Use snapshot data if available, otherwise fall back to service lookup
+                const description = line.description || serviceMap.get(line.serviceId)?.name || 'Unbekannt';
+                const hourlyRate = line.hourlyRate ?? serviceMap.get(line.serviceId)?.hourlyRate ?? 0;
+                const taxRate = line.taxRate ?? serviceMap.get(line.serviceId)?.taxRate ?? 0;
 
                 return (
                   <Table.Tr key={index}>
                     <Table.Td>
-                      <Text fw={500}>{service.name}</Text>
+                      <Text fw={500}>{description}</Text>
                       {line.note && (
                         <Text size="xs" c="dimmed">
                           {line.note}
@@ -133,9 +139,9 @@ export function InvoicePrintView({
                     </Table.Td>
                     <Table.Td style={{ textAlign: 'right' }}>{line.hours}</Table.Td>
                     <Table.Td style={{ textAlign: 'right' }}>
-                      {formatCurrency(service.hourlyRate)}
+                      {formatCurrency(hourlyRate)}
                     </Table.Td>
-                    <Table.Td style={{ textAlign: 'right' }}>{service.taxRate}%</Table.Td>
+                    <Table.Td style={{ textAlign: 'right' }}>{taxRate}%</Table.Td>
                     <Table.Td style={{ textAlign: 'right' }}>
                       {formatCurrency(lineCalc.netAmount)}
                     </Table.Td>
