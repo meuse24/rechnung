@@ -6,7 +6,6 @@ import {
   Group,
   Stack,
   Paper,
-  TextInput,
   Select,
   NumberInput,
   Table,
@@ -41,6 +40,7 @@ import { formatCurrency } from '@/utils/money';
 import { InvoicePrintView } from '@/components/InvoicePrintView';
 import { generatePDF, generatePDFFilename } from '@/utils/pdfExport';
 import { createInvoiceSnapshot } from '@/utils/invoice';
+import { InvoiceHeaderForm } from '@/components/invoice/InvoiceHeaderForm';
 
 export function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -271,68 +271,13 @@ export function InvoicePage() {
         )}
 
         {/* Kopfdaten */}
-        <Paper p="md" withBorder>
-          <Stack gap="md">
-            <Group grow>
-              <TextInput
-                label="Rechnungsnummer"
-                placeholder="RE-2024-001"
-                required
-                value={invoice.invoiceNumber}
-                onChange={(e) =>
-                  setInvoice({ ...invoice, invoiceNumber: e.target.value })
-                }
-              />
-              <TextInput
-                label="Rechnungsdatum"
-                type="date"
-                required
-                value={invoice.issueDate}
-                onChange={(e) => setInvoice({ ...invoice, issueDate: e.target.value })}
-              />
-              <Select
-                label="Status"
-                data={statusOptions}
-                value={invoice.status || 'draft'}
-                onChange={(value) =>
-                  setInvoice({ ...invoice, status: (value as InvoiceStatus) || 'draft' })
-                }
-              />
-            </Group>
-
-            <Select
-              label="Kunde"
-              placeholder="Kunde auswählen"
-              required
-              data={customerOptions}
-              value={invoice.customerId}
-              onChange={(value) =>
-                setInvoice({ ...invoice, customerId: value || '' })
-              }
-              searchable
-            />
-
-            {selectedCustomer && (
-              <Paper p="sm" bg="gray.0">
-                <Text size="sm" fw={500}>
-                  {selectedCustomer.name}
-                </Text>
-                <Text size="sm" c="dimmed">
-                  {selectedCustomer.addressLine1}
-                </Text>
-                <Text size="sm" c="dimmed">
-                  {selectedCustomer.postalCode} {selectedCustomer.city},{' '}
-                  {selectedCustomer.countryCode}
-                </Text>
-                {selectedCustomer.email && (
-                  <Text size="sm" c="dimmed">
-                    {selectedCustomer.email}
-                  </Text>
-                )}
-              </Paper>
-            )}
-          </Stack>
-        </Paper>
+        <InvoiceHeaderForm
+          invoice={invoice}
+          customerOptions={customerOptions}
+          statusOptions={statusOptions}
+          selectedCustomer={selectedCustomer}
+          onChange={setInvoice}
+        />
 
         {/* Positionen */}
         <Paper p="md" withBorder>
