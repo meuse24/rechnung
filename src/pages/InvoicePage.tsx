@@ -35,7 +35,8 @@ import {
   InvoiceStatus,
   CustomerSnapshot,
 } from '@/models/types';
-import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
+import { loadFromStorage, STORAGE_KEYS } from '@/storage/localStorage';
+import { loadInvoices, saveInvoices } from '@/storage/invoices';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
 import { InvoicePrintView } from '@/components/InvoicePrintView';
@@ -74,7 +75,7 @@ export function InvoicePage() {
 
     // Rechnung laden wenn ID vorhanden und nicht "new"
     if (invoiceId && invoiceId !== 'new') {
-      const allInvoices = loadFromStorage<Invoice[]>(STORAGE_KEYS.INVOICES, []);
+      const allInvoices = loadInvoices();
       const existing = allInvoices.find((inv) => inv.id === invoiceId);
       if (existing) {
         setInvoice(existing);
@@ -161,7 +162,7 @@ export function InvoicePage() {
     // Create immutable snapshot
     const invoiceWithSnapshot = createInvoiceSnapshot();
 
-    const allInvoices = loadFromStorage<Invoice[]>(STORAGE_KEYS.INVOICES, []);
+    const allInvoices = loadInvoices();
     const existingIndex = allInvoices.findIndex((inv) => inv.id === invoice.id);
 
     if (existingIndex >= 0) {
@@ -172,7 +173,7 @@ export function InvoicePage() {
       allInvoices.push(invoiceWithSnapshot);
     }
 
-    saveToStorage(STORAGE_KEYS.INVOICES, allInvoices);
+    saveInvoices(allInvoices);
     alert('Rechnung wurde gespeichert.');
     navigate('/invoices');
   };
