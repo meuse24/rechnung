@@ -10,7 +10,6 @@ import {
   Text,
   Divider,
   ActionIcon,
-  Textarea,
   Alert,
 } from '@mantine/core';
 import {
@@ -32,12 +31,13 @@ import {
 import { loadFromStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { loadInvoices, saveInvoices } from '@/storage/invoices';
 import { calculateInvoiceTotals } from '@/utils/calc';
-import { formatCurrency } from '@/utils/money';
 import { InvoicePrintView } from '@/components/InvoicePrintView';
 import { generatePDF, generatePDFFilename } from '@/utils/pdfExport';
 import { createInvoiceSnapshot } from '@/utils/invoice';
 import { InvoiceHeaderForm } from '@/components/invoice/InvoiceHeaderForm';
 import { InvoiceLinesEditor } from '@/components/invoice/InvoiceLinesEditor';
+import { InvoiceTotalsPanel } from '@/components/invoice/InvoiceTotalsPanel';
+import { InvoiceNotesPanel } from '@/components/invoice/InvoiceNotesPanel';
 
 export function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -289,39 +289,18 @@ export function InvoicePage() {
 
         {/* Summen */}
         {invoice.lines.length > 0 && (
-          <Paper p="md" withBorder>
-            <Stack gap="xs">
-              <Group justify="space-between">
-                <Text>Nettobetrag:</Text>
-                <Text fw={500}>{formatCurrency(totals.netTotal)}</Text>
-              </Group>
-              <Group justify="space-between">
-                <Text>Mehrwertsteuer:</Text>
-                <Text fw={500}>{formatCurrency(totals.taxTotal)}</Text>
-              </Group>
-              <Divider />
-              <Group justify="space-between">
-                <Text size="lg" fw={700}>
-                  Gesamtbetrag:
-                </Text>
-                <Text size="lg" fw={700}>
-                  {formatCurrency(totals.grossTotal)}
-                </Text>
-              </Group>
-            </Stack>
-          </Paper>
+          <InvoiceTotalsPanel
+            netTotal={totals.netTotal}
+            taxTotal={totals.taxTotal}
+            grossTotal={totals.grossTotal}
+          />
         )}
 
         {/* Notizen */}
-        <Paper p="md" withBorder>
-          <Textarea
-            label="Notizen / Zahlungshinweise"
-            placeholder="z.B. Zahlbar innerhalb von 14 Tagen"
-            rows={3}
-            value={invoice.notes}
-            onChange={(e) => setInvoice({ ...invoice, notes: e.target.value })}
-          />
-        </Paper>
+        <InvoiceNotesPanel
+          notes={invoice.notes || ''}
+          onChange={(notes) => setInvoice({ ...invoice, notes })}
+        />
       </Stack>
 
       {/* Print View - nur beim Drucken sichtbar */}
