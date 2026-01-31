@@ -1,9 +1,11 @@
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
+import './theme.css';
 import './print.css';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { theme } from './theme';
 import { Layout } from './app/Layout';
 import { CustomersPage } from './pages/CustomersPage';
 import { ServicesPage } from './pages/ServicesPage';
@@ -14,7 +16,7 @@ import { HelpPage } from './pages/HelpPage';
 
 function App() {
   return (
-    <MantineProvider defaultColorScheme="light">
+    <MantineProvider theme={theme} defaultColorScheme="auto">
       <Notifications position="top-right" />
       <BrowserRouter>
         <Routes>

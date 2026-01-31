@@ -1,0 +1,211 @@
+/**
+ * Additional theme styles for improved contrast and accessibility
+ * Import this in App.tsx after Mantine styles
+ */
+
+/* Enhanced focus visibility for all focusable elements */
+:focus-visible {
+  outline: 2px solid var(--mantine-color-blue-6) !important;
+  outline-offset: 2px !important;
+}
+
+/* Remove default focus for mouse users (keep for keyboard) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Improve text contrast in dimmed text */
+.mantine-Text-root[data-c='dimmed'] {
+  color: var(--mantine-color-gray-7) !important;
+  font-weight: 500;
+}
+
+/* Better hover states for interactive elements */
+.mantine-ActionIcon-root:hover:not(:disabled) {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.mantine-ActionIcon-root:focus-visible {
+  outline: 2px solid var(--mantine-color-blue-6);
+  outline-offset: 2px;
+}
+
+/* Enhanced Table striping for better row distinction */
+.mantine-Table-root[data-striped='true'] tbody tr:nth-of-type(odd) {
+  background-color: var(--mantine-color-gray-0);
+}
+
+.mantine-Table-root[data-highlightOnHover='true'] tbody tr:hover {
+  background-color: var(--mantine-color-blue-0) !important;
+}
+
+/* Better contrast for disabled states */
+.mantine-Input-input:disabled,
+.mantine-Select-input:disabled,
+.mantine-Textarea-input:disabled {
+  color: var(--mantine-color-gray-7) !important;
+  cursor: not-allowed;
+}
+
+/* Enhanced Dropdown visibility */
+.mantine-Select-dropdown,
+.mantine-MultiSelect-dropdown {
+  border: 1.5px solid var(--mantine-color-gray-4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Better option visibility in Select/MultiSelect */
+.mantine-Select-option[data-combobox-selected='true'],
+.mantine-MultiSelect-option[data-combobox-selected='true'] {
+  background-color: var(--mantine-color-blue-6) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.mantine-Select-option:hover,
+.mantine-MultiSelect-option:hover {
+  background-color: var(--mantine-color-blue-1) !important;
+}
+
+/* Improve label visibility */
+.mantine-Input-label,
+.mantine-Select-label,
+.mantine-Textarea-label,
+.mantine-NumberInput-label,
+.mantine-FileInput-label {
+  font-weight: 600;
+  color: var(--mantine-color-gray-9);
+  margin-bottom: 6px;
+}
+
+/* Better error message visibility */
+.mantine-Input-error,
+.mantine-Select-error,
+.mantine-Textarea-error {
+  font-weight: 500;
+  color: var(--mantine-color-red-7);
+  margin-top: 4px;
+}
+
+/* Enhanced placeholder visibility */
+.mantine-Input-input::placeholder,
+.mantine-Select-input::placeholder,
+.mantine-Textarea-input::placeholder {
+  color: var(--mantine-color-gray-6);
+  opacity: 1;
+  font-weight: 400;
+}
+
+/* Better divider visibility */
+.mantine-Divider-root {
+  border-top-width: 1.5px;
+  border-color: var(--mantine-color-gray-3);
+}
+
+/* Enhanced Paper/Card borders */
+.mantine-Paper-root,
+.mantine-Card-root {
+  border: 1.5px solid var(--mantine-color-gray-3);
+}
+
+/* Better Button focus states */
+.mantine-Button-root:focus-visible {
+  outline: 2px solid var(--mantine-color-blue-6);
+  outline-offset: 2px;
+}
+
+/* Improve Badge contrast */
+.mantine-Badge-root {
+  font-weight: 600;
+  border: 1px solid currentColor;
+}
+
+/* Better Alert visibility */
+.mantine-Alert-root {
+  border-width: 1.5px;
+}
+
+.mantine-Alert-title {
+  font-weight: 700;
+  color: inherit;
+}
+
+.mantine-Alert-message {
+  font-weight: 500;
+}
+
+/* Enhanced Modal borders */
+.mantine-Modal-content {
+  border: 1.5px solid var(--mantine-color-gray-3);
+}
+
+.mantine-Modal-header {
+  border-bottom: 1.5px solid var(--mantine-color-gray-3);
+}
+
+.mantine-Modal-title {
+  font-weight: 700;
+  color: var(--mantine-color-gray-9);
+}
+
+/* Better Notification visibility */
+.mantine-Notification-root {
+  border: 1.5px solid var(--mantine-color-gray-4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.mantine-Notification-title {
+  font-weight: 700;
+}
+
+.mantine-Notification-description {
+  font-weight: 500;
+}
+
+/* Improve Checkbox/Radio contrast */
+.mantine-Checkbox-input {
+  border-width: 2px;
+  border-color: var(--mantine-color-gray-5);
+}
+
+.mantine-Radio-radio {
+  border-width: 2px;
+  border-color: var(--mantine-color-gray-5);
+}
+
+.mantine-Checkbox-label,
+.mantine-Radio-label {
+  font-weight: 500;
+  color: var(--mantine-color-gray-9);
+}
+
+/* Better Switch visibility */
+.mantine-Switch-track {
+  border: 2px solid var(--mantine-color-gray-4);
+}
+
+.mantine-Switch-track[data-checked] {
+  border-color: var(--mantine-color-blue-6);
+}
+
+.mantine-Switch-label {
+  font-weight: 500;
+  color: var(--mantine-color-gray-9);
+}
+
+/* Enhanced Tabs */
+.mantine-Tabs-tab {
+  font-weight: 500;
+  color: var(--mantine-color-gray-7);
+}
+
+.mantine-Tabs-tab[data-active] {
+  font-weight: 600;
+  color: var(--mantine-color-blue-7);
+  border-bottom-width: 2px;
+}
+
+.mantine-Tabs-tab:hover:not([data-active]) {
+  border-bottom-color: var(--mantine-color-gray-4);
+  border-bottom-width: 2px;
+}

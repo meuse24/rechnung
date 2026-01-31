@@ -1,10 +1,12 @@
-import { AppShell, Container, Tabs, ActionIcon, Tooltip } from '@mantine/core';
-import { IconHelp } from '@tabler/icons-react';
+import { AppShell, Container, Tabs, ActionIcon, Tooltip, Group, useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
+import { IconHelp, IconSun, IconMoon } from '@tabler/icons-react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
 export function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setColorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme('light');
 
   const getActiveTab = () => {
     if (location.pathname === '/') return 'settings';
@@ -19,6 +21,10 @@ export function Layout() {
     else if (value === 'customers') navigate('/customers');
     else if (value === 'services') navigate('/services');
     else if (value === 'invoices') navigate('/invoices');
+  };
+
+  const toggleColorScheme = () => {
+    setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark');
   };
 
   return (
@@ -42,16 +48,29 @@ export function Layout() {
             </Tabs.List>
           </Tabs>
 
-          <Tooltip label="Hilfe & Anleitung" position="bottom">
-            <ActionIcon
-              variant="subtle"
-              size="lg"
-              onClick={() => navigate('/help')}
-              aria-label="Hilfe"
-            >
-              <IconHelp size={24} />
-            </ActionIcon>
-          </Tooltip>
+          <Group gap="xs">
+            <Tooltip label={computedColorScheme === 'dark' ? 'Heller Modus' : 'Dunkler Modus'} position="bottom">
+              <ActionIcon
+                variant="subtle"
+                size="lg"
+                onClick={toggleColorScheme}
+                aria-label="Farbschema umschalten"
+              >
+                {computedColorScheme === 'dark' ? <IconSun size={24} /> : <IconMoon size={24} />}
+              </ActionIcon>
+            </Tooltip>
+
+            <Tooltip label="Hilfe & Anleitung" position="bottom">
+              <ActionIcon
+                variant="subtle"
+                size="lg"
+                onClick={() => navigate('/help')}
+                aria-label="Hilfe"
+              >
+                <IconHelp size={24} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
         </Container>
       </AppShell.Header>
 
