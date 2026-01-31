@@ -3,6 +3,11 @@
  * Import this in App.tsx after Mantine styles
  */
 
+/* Background colors for light and dark mode */
+body {
+  background-color: light-dark(#f0f4f8, var(--mantine-color-dark-7));
+}
+
 /* Enhanced focus visibility for all focusable elements */
 :focus-visible {
   outline: 2px solid var(--mantine-color-blue-6) !important;
