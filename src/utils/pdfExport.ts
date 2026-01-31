@@ -14,7 +14,7 @@ export async function generatePDF(element: HTMLElement, filename: string): Promi
   try {
     // Create canvas from HTML element
     const canvas = await html2canvas(element, {
-      scale: 2, // Higher quality
+      scale: 1, // Standard 1:1 scaling for optimal size
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
@@ -22,8 +22,8 @@ export async function generatePDF(element: HTMLElement, filename: string): Promi
 
     const imgWidth = 210; // A4 width in mm
     const pageHeight = 297; // A4 height in mm
-    const marginTop = 15; // mm
-    const marginBottom = 12; // mm
+    const marginTop = 12; // mm (reduced from 15)
+    const marginBottom = 10; // mm (reduced from 12)
     const contentHeight = pageHeight - marginTop - marginBottom;
     const pxPerMm = canvas.width / imgWidth;
     const pageHeightPx = Math.floor(contentHeight * pxPerMm);
@@ -76,12 +76,12 @@ export async function generatePDF(element: HTMLElement, filename: string): Promi
     // Add page numbers (bottom-right)
     const pageCount = pdf.getNumberOfPages();
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(4.5);
+    pdf.setFontSize(9);
     pdf.setTextColor(0, 0, 0);
     for (let page = 1; page <= pageCount; page += 1) {
       pdf.setPage(page);
       const label = `Seite ${page} / ${pageCount}`;
-      pdf.text(label, imgWidth - 10, pageHeight - 6, { align: 'right' });
+      pdf.text(label, imgWidth - 10, pageHeight - 8, { align: 'right' });
     }
 
     // Save PDF

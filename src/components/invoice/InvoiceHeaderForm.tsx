@@ -38,9 +38,14 @@ export function InvoiceHeaderForm({
             label="Status"
             data={statusOptions}
             value={invoice.status || 'draft'}
-            onChange={(value) =>
-              onChange({ ...invoice, status: (value as InvoiceStatus) || 'draft' })
-            }
+            onChange={(value) => {
+              const validStatuses: InvoiceStatus[] = ['draft', 'sent', 'paid', 'cancelled'];
+              const newStatus: InvoiceStatus =
+                value && validStatuses.includes(value as InvoiceStatus)
+                  ? (value as InvoiceStatus)
+                  : 'draft';
+              onChange({ ...invoice, status: newStatus });
+            }}
           />
         </Group>
 

@@ -1,45 +1,9 @@
-import { useEffect, useRef } from 'react';
 import { Paper, Text, Table, Divider, Stack, Group } from '@mantine/core';
 import { Invoice, Customer, Service, CompanySettings } from '@/models/types';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
 import { formatGermanDate } from '@/utils/date';
 
-const PAGE_WIDTH_MM = 210;
-const PAGE_HEIGHT_MM = 297;
-const PAGE_MARGIN_MM = 15;
-const FOOTER_OFFSET_PX = -6;
-
-const getPageContentHeightPx = (container: HTMLElement): number => {
-  const contentWidthMm = PAGE_WIDTH_MM - PAGE_MARGIN_MM * 2;
-  const contentHeightMm = PAGE_HEIGHT_MM - PAGE_MARGIN_MM * 2;
-  const rect = container.getBoundingClientRect();
-  const pxPerMm = rect.width > 0 ? rect.width / contentWidthMm : 96 / 25.4;
-  return Math.floor(contentHeightMm * pxPerMm);
-};
-
-const clearPrintPageNumbers = (container: HTMLElement | null) => {
-  if (!container) return;
-  container.querySelectorAll('.print-page-number').forEach((node) => node.remove());
-};
-
-const addPrintPageNumbers = (container: HTMLElement | null) => {
-  if (!container) return;
-  clearPrintPageNumbers(container);
-
-  const contentHeight = container.scrollHeight;
-  const pageContentHeightPx = getPageContentHeightPx(container);
-  if (!contentHeight || pageContentHeightPx <= 0) return;
-
-  const pageCount = Math.max(1, Math.ceil(contentHeight / pageContentHeightPx));
-  for (let page = 1; page <= pageCount; page += 1) {
-    const marker = document.createElement('div');
-    marker.className = 'print-page-number';
-    marker.textContent = `Seite ${page} / ${pageCount}`;
-    marker.style.top = `${page * pageContentHeightPx - FOOTER_OFFSET_PX}px`;
-    container.appendChild(marker);
-  }
-};
 
 interface InvoicePrintViewProps {
   invoice: Invoice;
@@ -55,40 +19,6 @@ export function InvoicePrintView({
   companySettings,
 }: InvoicePrintViewProps) {
   const totals = calculateInvoiceTotals(invoice, services);
-  const printRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const handleBeforePrint = () => addPrintPageNumbers(printRef.current);
-    const handleAfterPrint = () => clearPrintPageNumbers(printRef.current);
-
-    window.addEventListener('beforeprint', handleBeforePrint);
-    window.addEventListener('afterprint', handleAfterPrint);
-
-    const mediaQuery = window.matchMedia('print');
-    const handleChange = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        handleBeforePrint();
-      } else {
-        handleAfterPrint();
-      }
-    };
-
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange);
-    } else {
-      mediaQuery.addListener(handleChange);
-    }
-
-    return () => {
-      window.removeEventListener('beforeprint', handleBeforePrint);
-      window.removeEventListener('afterprint', handleAfterPrint);
-      if (mediaQuery.addEventListener) {
-        mediaQuery.removeEventListener('change', handleChange);
-      } else {
-        mediaQuery.removeListener(handleChange);
-      }
-    };
-  }, []);
 
   // Use customer snapshot (required, no fallback)
   const displayCustomer = invoice.customerSnapshot;
@@ -99,16 +29,22 @@ export function InvoicePrintView({
 
   return (
     <Paper
-      ref={printRef}
       className="print-only"
-      p="lg"
-      style={{ maxWidth: 800, margin: '0 auto', border: 'none', boxShadow: 'none' }}
+      p="sm"
+      style={{
+        maxWidth: 700,
+        margin: '0 auto',
+        border: 'none',
+        boxShadow: 'none',
+        fontSize: '11px',
+        lineHeight: 1.3,
+      }}
     >
-      <Stack gap="sm">
+      <Stack gap={8}>
         {/* Firmenkopf / Absender */}
         {companySettings && companySettings.companyName && (
           <div>
-            <Text size="xl" fw={700}>
+            <Text size="md" fw={700}>
               {companySettings.companyName}
             </Text>
             <Text size="sm">{companySettings.addressLine1}</Text>
@@ -137,11 +73,11 @@ export function InvoicePrintView({
           </div>
         )}
 
-        <Divider my="xs" />
+        <Divider my={4} />
 
         {/* Header */}
         <div>
-          <Text size="xl" fw={700} mb="xs">
+          <Text size="md" fw={700} mb={4}>
             RECHNUNG
           </Text>
           <Group justify="space-between">
@@ -160,11 +96,11 @@ export function InvoicePrintView({
           </Group>
         </div>
 
-        <Divider my="xs" />
+        <Divider my={4} />
 
         {/* Kundendetails */}
         <div>
-          <Text size="sm" c="dimmed" mb="xs">
+          <Text size="sm" c="dimmed" mb={4}>
             Rechnungsempfänger
           </Text>
           <Text fw={600}>{displayCustomer.name}</Text>
@@ -176,14 +112,14 @@ export function InvoicePrintView({
           {displayCustomer.email && <Text size="sm">{displayCustomer.email}</Text>}
         </div>
 
-        <Divider my="xs" />
+        <Divider my={4} />
 
         {/* Positionen */}
         <div>
-          <Text fw={600} mb="xs">
+          <Text fw={600} mb={4}>
             Leistungen
           </Text>
-          <Table>
+          <Table style={{ fontSize: '11px' }}>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Beschreibung</Table.Th>

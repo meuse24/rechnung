@@ -19,11 +19,19 @@ export const createInvoiceSnapshot = (
 
   const linesWithSnapshots: InvoiceLine[] = invoice.lines.map((line) => {
     const service = services.find((s) => s.id === line.serviceId);
+
+    // Warn if service was deleted but still referenced
+    if (!service && line.serviceId) {
+      console.warn(
+        `Service with ID ${line.serviceId} not found - using fallback values`
+      );
+    }
+
     return {
       ...line,
-      description: service?.name,
-      hourlyRate: service?.hourlyRate,
-      taxRate: service?.taxRate,
+      description: service?.name ?? line.description ?? 'Gelöschte Leistung',
+      hourlyRate: service?.hourlyRate ?? line.hourlyRate ?? 0,
+      taxRate: service?.taxRate ?? line.taxRate ?? 0,
     };
   });
 

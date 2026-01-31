@@ -12,13 +12,15 @@ import {
   Badge,
   TextInput,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import {
   IconPlus,
   IconEdit,
   IconTrash,
-  IconPrinter,
+  IconFileTypePdf,
   IconCopy,
   IconSearch,
+  IconCheck,
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { Invoice, Customer, Service, InvoiceStatus } from '@/models/types';
@@ -71,7 +73,12 @@ export function InvoicesListPage() {
     };
     const updated = [...invoices, duplicated];
     saveInvoices(updated);
-    alert('Rechnung wurde dupliziert.');
+    notifications.show({
+      title: 'Erfolg',
+      message: 'Rechnung wurde dupliziert.',
+      color: 'green',
+      icon: <IconCheck size={16} />,
+    });
   };
 
   const handleDeleteClick = (invoiceId: string) => {
@@ -87,9 +94,9 @@ export function InvoicesListPage() {
     }
   };
 
-  const handlePrint = (invoice: Invoice) => {
-    // Navigate to invoice page and trigger print
-    navigate(`/invoice/${invoice.id}`, { state: { print: true } });
+  const handlePdfExport = (invoice: Invoice) => {
+    // Navigate to invoice page and trigger PDF export
+    navigate(`/invoice/${invoice.id}`, { state: { exportPdf: true } });
   };
 
   const getCustomerName = (customerId: string): string => {
@@ -169,7 +176,7 @@ export function InvoicesListPage() {
                   <Table.Th>Netto</Table.Th>
                   <Table.Th>Brutto</Table.Th>
                   <Table.Th>Status</Table.Th>
-                  <Table.Th style={{ width: 150 }}>Aktionen</Table.Th>
+                  <Table.Th style={{ width: 180 }}>Aktionen</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -208,10 +215,10 @@ export function InvoicesListPage() {
                           <ActionIcon
                             variant="subtle"
                             color="violet"
-                            onClick={() => handlePrint(invoice)}
-                            title="Drucken"
+                            onClick={() => handlePdfExport(invoice)}
+                            title="Als PDF exportieren"
                           >
-                            <IconPrinter size={16} />
+                            <IconFileTypePdf size={16} />
                           </ActionIcon>
                           <ActionIcon
                             variant="subtle"

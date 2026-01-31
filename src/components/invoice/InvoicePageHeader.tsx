@@ -3,7 +3,6 @@ import {
   IconArrowLeft,
   IconDeviceFloppy,
   IconFileTypePdf,
-  IconPrinter,
 } from '@tabler/icons-react';
 
 interface InvoicePageHeaderProps {
@@ -11,7 +10,6 @@ interface InvoicePageHeaderProps {
   onBack: () => void;
   onSave: () => void;
   onPdf: () => void;
-  onPrint: () => void;
   pdfDisabled?: boolean;
 }
 
@@ -20,7 +18,6 @@ export function InvoicePageHeader({
   onBack,
   onSave,
   onPdf,
-  onPrint,
   pdfDisabled,
 }: InvoicePageHeaderProps) {
   return (
@@ -48,14 +45,6 @@ export function InvoicePageHeader({
           disabled={pdfDisabled}
         >
           Als PDF
-        </Button>
-        <Button
-          variant="light"
-          size="sm"
-          leftSection={<IconPrinter size={16} />}
-          onClick={onPrint}
-        >
-          Drucken
         </Button>
       </Group>
     </Group>

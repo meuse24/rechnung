@@ -1,6 +1,8 @@
 import '@mantine/core/styles.css';
+import '@mantine/notifications/styles.css';
 import './print.css';
 import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './app/Layout';
 import { CustomersPage } from './pages/CustomersPage';
@@ -13,6 +15,7 @@ import { HelpPage } from './pages/HelpPage';
 function App() {
   return (
     <MantineProvider defaultColorScheme="light">
+      <Notifications position="top-right" />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>

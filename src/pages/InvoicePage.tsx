@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Container, Stack, Alert } from '@mantine/core';
-import { IconInfoCircle } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
+import { IconInfoCircle, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Invoice,
@@ -24,7 +25,7 @@ export function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { customers, services, companySettings } = useInvoiceDependencies();
+  const { customers, services, companySettings, isLoading, error } = useInvoiceDependencies();
   const [invoice, setInvoice] = useState<Invoice>({
     id: crypto.randomUUID(),
     invoiceNumber: '',
@@ -34,26 +35,37 @@ export function InvoicePage() {
     notes: '',
     status: 'draft',
   });
+  const pdfExportTriggered = useRef(false);
 
-  // Laden von Stammdaten und Rechnung beim Mount
+  // Laden von Rechnung beim Mount
   useEffect(() => {
-    // Rechnung laden wenn ID vorhanden und nicht "new"
     if (invoiceId && invoiceId !== 'new') {
       const allInvoices = loadInvoices();
       const existing = allInvoices.find((inv) => inv.id === invoiceId);
       if (existing) {
         setInvoice(existing);
       } else {
-        alert('Rechnung nicht gefunden.');
+        notifications.show({
+          title: 'Fehler',
+          message: 'Rechnung nicht gefunden.',
+          color: 'red',
+          icon: <IconAlertCircle size={16} />,
+        });
         navigate('/invoices');
       }
     }
+  }, [invoiceId, navigate]);
 
-    // Trigger print if requested from InvoicesList
-    if (location.state?.print) {
-      setTimeout(() => window.print(), 100);
+  // Auto-trigger PDF export wenn von Liste gestartet (nur einmal!)
+  useEffect(() => {
+    if (location.state?.exportPdf && invoice.invoiceNumber && !pdfExportTriggered.current) {
+      pdfExportTriggered.current = true;
+      const timer = setTimeout(() => {
+        handlePDFExport();
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [invoiceId, navigate, location]);
+  }, [location.state?.exportPdf, invoice.invoiceNumber]);
 
   const addLine = () => {
     setInvoice({
@@ -82,12 +94,22 @@ export function InvoicePage() {
 
   const handleSave = () => {
     if (!invoice.invoiceNumber || !invoice.customerId) {
-      alert('Bitte Rechnungsnummer und Kunde auswählen.');
+      notifications.show({
+        title: 'Validierungsfehler',
+        message: 'Bitte Rechnungsnummer und Kunde auswählen.',
+        color: 'yellow',
+        icon: <IconAlertCircle size={16} />,
+      });
       return;
     }
 
     if (invoice.lines.length === 0) {
-      alert('Bitte mindestens eine Position hinzufügen.');
+      notifications.show({
+        title: 'Validierungsfehler',
+        message: 'Bitte mindestens eine Position hinzufügen.',
+        color: 'yellow',
+        icon: <IconAlertCircle size={16} />,
+      });
       return;
     }
 
@@ -106,18 +128,24 @@ export function InvoicePage() {
     }
 
     saveInvoices(allInvoices);
-    alert('Rechnung wurde gespeichert.');
+    notifications.show({
+      title: 'Erfolg',
+      message: 'Rechnung wurde gespeichert.',
+      color: 'green',
+      icon: <IconCheck size={16} />,
+    });
     navigate('/invoices');
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const handlePDFExport = async () => {
     const printElement = document.querySelector('.print-only') as HTMLElement;
     if (!printElement) {
-      alert('Fehler: Druckansicht nicht gefunden.');
+      notifications.show({
+        title: 'Fehler',
+        message: 'Druckansicht nicht gefunden.',
+        color: 'red',
+        icon: <IconAlertCircle size={16} />,
+      });
       return;
     }
 
@@ -143,8 +171,20 @@ export function InvoicePage() {
       printElement.style.position = originalPosition;
       printElement.style.left = originalLeft;
       printElement.style.top = '';
+
+      notifications.show({
+        title: 'Erfolg',
+        message: `PDF wurde erstellt: ${filename}`,
+        color: 'green',
+        icon: <IconCheck size={16} />,
+      });
     } catch (error) {
-      alert('Fehler beim Erstellen der PDF-Datei.');
+      notifications.show({
+        title: 'Fehler',
+        message: 'Fehler beim Erstellen der PDF-Datei.',
+        color: 'red',
+        icon: <IconAlertCircle size={16} />,
+      });
       console.error(error);
     }
   };
@@ -190,11 +230,16 @@ export function InvoicePage() {
           onBack={handleBack}
           onSave={handleSave}
           onPdf={handlePDFExport}
-          onPrint={handlePrint}
           pdfDisabled={!invoice.invoiceNumber || !invoice.customerId}
         />
 
-        {!hasData && (
+        {error && (
+          <Alert icon={<IconAlertCircle size={16} />} title="Fehler" color="red">
+            {error}
+          </Alert>
+        )}
+
+        {!hasData && !isLoading && (
           <Alert icon={<IconInfoCircle size={16} />} title="Hinweis" color="blue">
             Bitte fügen Sie zuerst Kunden und Leistungen in den entsprechenden Bereichen hinzu.
           </Alert>
