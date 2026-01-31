@@ -1,24 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Container,
-  Title,
-  Button,
-  Group,
-  Stack,
-  Paper,
-  Select,
-  Text,
-  Divider,
-  ActionIcon,
-  Alert,
-} from '@mantine/core';
-import {
-  IconDeviceFloppy,
-  IconPrinter,
-  IconInfoCircle,
-  IconArrowLeft,
-  IconFileTypePdf,
-} from '@tabler/icons-react';
+import { Container, Stack, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Customer,
@@ -39,6 +21,7 @@ import { InvoiceHeaderForm } from '@/components/invoice/InvoiceHeaderForm';
 import { InvoiceLinesEditor } from '@/components/invoice/InvoiceLinesEditor';
 import { InvoiceTotalsPanel } from '@/components/invoice/InvoiceTotalsPanel';
 import { InvoiceNotesPanel } from '@/components/invoice/InvoiceNotesPanel';
+import { InvoicePageHeader } from '@/components/invoice/InvoicePageHeader';
 
 export function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -219,48 +202,14 @@ export function InvoicePage() {
   return (
     <Container size="lg" py="xl" className="invoice-page">
       <Stack gap="lg">
-        <Group justify="space-between">
-          <Group gap="xs">
-            <ActionIcon
-              variant="subtle"
-              size="lg"
-              onClick={handleBack}
-              className="no-print"
-            >
-              <IconArrowLeft size={20} />
-            </ActionIcon>
-            <Title order={1}>
-              {isNew ? 'Neue Rechnung' : 'Rechnung bearbeiten'}
-            </Title>
-          </Group>
-          <Group gap="xs" className="no-print">
-            <Button
-              variant="filled"
-              size="sm"
-              leftSection={<IconDeviceFloppy size={16} />}
-              onClick={handleSave}
-            >
-              Speichern
-            </Button>
-            <Button
-              variant="light"
-              size="sm"
-              leftSection={<IconFileTypePdf size={16} />}
-              onClick={handlePDFExport}
-              disabled={!invoice.invoiceNumber || !invoice.customerId}
-            >
-              Als PDF
-            </Button>
-            <Button
-              variant="light"
-              size="sm"
-              leftSection={<IconPrinter size={16} />}
-              onClick={handlePrint}
-            >
-              Drucken
-            </Button>
-          </Group>
-        </Group>
+        <InvoicePageHeader
+          title={isNew ? 'Neue Rechnung' : 'Rechnung bearbeiten'}
+          onBack={handleBack}
+          onSave={handleSave}
+          onPdf={handlePDFExport}
+          onPrint={handlePrint}
+          pdfDisabled={!invoice.invoiceNumber || !invoice.customerId}
+        />
 
         {!hasData && (
           <Alert icon={<IconInfoCircle size={16} />} title="Hinweis" color="blue">
