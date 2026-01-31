@@ -1,9 +1,9 @@
 import { Modal, Button, Stack, Text, Group, FileInput, Table, Alert, Badge } from '@mantine/core';
 import { useState } from 'react';
-import Papa from 'papaparse';
 import { Service } from '@/models/types';
 import { IconUpload, IconAlertCircle, IconFileTypeCsv } from '@tabler/icons-react';
 import { formatCurrency } from '@/utils/money';
+import { parseCsvFile, parseLocaleNumber } from '@/utils/csvImport';
 
 interface ServiceCSVImportModalProps {
   opened: boolean;
@@ -37,74 +37,62 @@ export function ServiceCSVImportModal({
     }
   };
 
-  const parseNumber = (value: string | undefined): number | null => {
-    if (!value) return null;
-    // Support both comma and dot as decimal separator
-    const normalized = value.trim().replace(',', '.');
-    const parsed = parseFloat(normalized);
-    return isNaN(parsed) ? null : parsed;
-  };
-
-  const parseCSV = (csvFile: File) => {
+  const parseCSV = async (csvFile: File) => {
     setIsLoading(true);
 
-    Papa.parse<CSVRow>(csvFile, {
-      header: true,
-      skipEmptyLines: true,
-      delimiter: ';',
-      complete: (results) => {
-        const validationErrors: string[] = [];
-        const services: Service[] = [];
+    try {
+      const results = await parseCsvFile<CSVRow>(csvFile);
+      const validationErrors: string[] = [];
+      const services: Service[] = [];
 
-        results.data.forEach((row, index) => {
-          const lineNumber = index + 2; // +2 because of header and 1-based indexing
+      results.data.forEach((row, index) => {
+        const lineNumber = index + 2; // +2 because of header and 1-based indexing
 
-          // Validate name
-          if (!row.name?.trim()) {
-            validationErrors.push(`Zeile ${lineNumber}: Name fehlt`);
-            return;
-          }
+        // Validate name
+        if (!row.name?.trim()) {
+          validationErrors.push(`Zeile ${lineNumber}: Name fehlt`);
+          return;
+        }
 
-          // Parse and validate hourlyRate
-          const hourlyRate = parseNumber(row.hourlyRate);
-          if (hourlyRate === null) {
-            validationErrors.push(`Zeile ${lineNumber}: Ungültiger Stundensatz`);
-            return;
-          }
-          if (hourlyRate <= 0) {
-            validationErrors.push(`Zeile ${lineNumber}: Stundensatz muss größer als 0 sein`);
-            return;
-          }
+        // Parse and validate hourlyRate
+        const hourlyRate = parseLocaleNumber(row.hourlyRate);
+        if (hourlyRate === null) {
+          validationErrors.push(`Zeile ${lineNumber}: Ungültiger Stundensatz`);
+          return;
+        }
+        if (hourlyRate <= 0) {
+          validationErrors.push(`Zeile ${lineNumber}: Stundensatz muss größer als 0 sein`);
+          return;
+        }
 
-          // Parse and validate taxRate
-          const taxRate = parseNumber(row.taxRate);
-          if (taxRate === null) {
-            validationErrors.push(`Zeile ${lineNumber}: Ungültiger Steuersatz`);
-            return;
-          }
-          if (taxRate < 0 || taxRate > 100) {
-            validationErrors.push(`Zeile ${lineNumber}: Steuersatz muss zwischen 0 und 100 liegen`);
-            return;
-          }
+        // Parse and validate taxRate
+        const taxRate = parseLocaleNumber(row.taxRate);
+        if (taxRate === null) {
+          validationErrors.push(`Zeile ${lineNumber}: Ungültiger Steuersatz`);
+          return;
+        }
+        if (taxRate < 0 || taxRate > 100) {
+          validationErrors.push(`Zeile ${lineNumber}: Steuersatz muss zwischen 0 und 100 liegen`);
+          return;
+        }
 
-          // Create service object
-          services.push({
-            id: crypto.randomUUID(),
-            name: row.name.trim(),
-            hourlyRate,
-            taxRate,
-          });
+        // Create service object
+        services.push({
+          id: crypto.randomUUID(),
+          name: row.name.trim(),
+          hourlyRate,
+          taxRate,
         });
+      });
 
-        setPreviewData(services);
-        setErrors(validationErrors);
-        setIsLoading(false);
-      },
-      error: (error) => {
-        setErrors([`Fehler beim Parsen der CSV-Datei: ${error.message}`]);
-        setIsLoading(false);
-      },
-    });
+      setPreviewData(services);
+      setErrors(validationErrors);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      setErrors([`Fehler beim Parsen der CSV-Datei: ${message}`]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleImport = () => {

@@ -1,8 +1,8 @@
 import { Modal, Button, Stack, Text, Group, FileInput, Table, Alert } from '@mantine/core';
 import { useState } from 'react';
-import Papa from 'papaparse';
 import { Customer } from '@/models/types';
 import { IconUpload, IconAlertCircle, IconFileTypeCsv } from '@tabler/icons-react';
+import { parseCsvFile } from '@/utils/csvImport';
 
 interface CustomerCSVImportModalProps {
   opened: boolean;
@@ -39,63 +39,58 @@ export function CustomerCSVImportModal({
     }
   };
 
-  const parseCSV = (csvFile: File) => {
+  const parseCSV = async (csvFile: File) => {
     setIsLoading(true);
+    try {
+      const results = await parseCsvFile<CSVRow>(csvFile);
+      const validationErrors: string[] = [];
+      const customers: Customer[] = [];
 
-    Papa.parse<CSVRow>(csvFile, {
-      header: true,
-      skipEmptyLines: true,
-      delimiter: ';',
-      complete: (results) => {
-        const validationErrors: string[] = [];
-        const customers: Customer[] = [];
+      results.data.forEach((row, index) => {
+        const lineNumber = index + 2; // +2 because of header and 1-based indexing
 
-        results.data.forEach((row, index) => {
-          const lineNumber = index + 2; // +2 because of header and 1-based indexing
+        // Validate required fields
+        if (!row.name?.trim()) {
+          validationErrors.push(`Zeile ${lineNumber}: Name fehlt`);
+          return;
+        }
+        if (!row.addressLine1?.trim()) {
+          validationErrors.push(`Zeile ${lineNumber}: Adresse fehlt`);
+          return;
+        }
+        if (!row.postalCode?.trim()) {
+          validationErrors.push(`Zeile ${lineNumber}: PLZ fehlt`);
+          return;
+        }
+        if (!row.city?.trim()) {
+          validationErrors.push(`Zeile ${lineNumber}: Stadt fehlt`);
+          return;
+        }
+        if (!row.countryCode?.trim()) {
+          validationErrors.push(`Zeile ${lineNumber}: Ländercode fehlt`);
+          return;
+        }
 
-          // Validate required fields
-          if (!row.name?.trim()) {
-            validationErrors.push(`Zeile ${lineNumber}: Name fehlt`);
-            return;
-          }
-          if (!row.addressLine1?.trim()) {
-            validationErrors.push(`Zeile ${lineNumber}: Adresse fehlt`);
-            return;
-          }
-          if (!row.postalCode?.trim()) {
-            validationErrors.push(`Zeile ${lineNumber}: PLZ fehlt`);
-            return;
-          }
-          if (!row.city?.trim()) {
-            validationErrors.push(`Zeile ${lineNumber}: Stadt fehlt`);
-            return;
-          }
-          if (!row.countryCode?.trim()) {
-            validationErrors.push(`Zeile ${lineNumber}: Ländercode fehlt`);
-            return;
-          }
-
-          // Create customer object
-          customers.push({
-            id: crypto.randomUUID(),
-            name: row.name.trim(),
-            addressLine1: row.addressLine1.trim(),
-            postalCode: row.postalCode.trim(),
-            city: row.city.trim(),
-            countryCode: row.countryCode.trim(),
-            email: row.email?.trim() || undefined,
-          });
+        // Create customer object
+        customers.push({
+          id: crypto.randomUUID(),
+          name: row.name.trim(),
+          addressLine1: row.addressLine1.trim(),
+          postalCode: row.postalCode.trim(),
+          city: row.city.trim(),
+          countryCode: row.countryCode.trim(),
+          email: row.email?.trim() || undefined,
         });
+      });
 
-        setPreviewData(customers);
-        setErrors(validationErrors);
-        setIsLoading(false);
-      },
-      error: (error) => {
-        setErrors([`Fehler beim Parsen der CSV-Datei: ${error.message}`]);
-        setIsLoading(false);
-      },
-    });
+      setPreviewData(customers);
+      setErrors(validationErrors);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      setErrors([`Fehler beim Parsen der CSV-Datei: ${message}`]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleImport = () => {
