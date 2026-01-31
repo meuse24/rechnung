@@ -175,7 +175,7 @@ export function InvoicesListPage() {
                   <Table.Th>Kunde</Table.Th>
                   <Table.Th style={{ textAlign: 'right' }}>Netto</Table.Th>
                   <Table.Th style={{ textAlign: 'right' }}>Brutto</Table.Th>
-                  <Table.Th style={{ width: 100 }}>Status</Table.Th>
+                  <Table.Th style={{ width: 100, textAlign: 'center' }}>Status</Table.Th>
                   <Table.Th style={{ width: 180 }}>Aktionen</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -193,7 +193,7 @@ export function InvoicesListPage() {
                       <Table.Td style={{ textAlign: 'right' }}>
                         <Text fw={500}>{formatCurrency(totals.grossTotal)}</Text>
                       </Table.Td>
-                      <Table.Td>{getStatusBadge(invoice.status)}</Table.Td>
+                      <Table.Td style={{ textAlign: 'center' }}>{getStatusBadge(invoice.status)}</Table.Td>
                       <Table.Td>
                         <Group gap="xs">
                           <ActionIcon
