@@ -57,13 +57,6 @@ export function InvoicePrintView({
   const totals = calculateInvoiceTotals(invoice, services);
   const printRef = useRef<HTMLDivElement | null>(null);
 
-  // Use customer snapshot (required, no fallback)
-  const displayCustomer = invoice.customerSnapshot;
-
-  if (!displayCustomer) {
-    return null;
-  }
-
   useEffect(() => {
     const handleBeforePrint = () => addPrintPageNumbers(printRef.current);
     const handleAfterPrint = () => clearPrintPageNumbers(printRef.current);
@@ -96,6 +89,13 @@ export function InvoicePrintView({
       }
     };
   }, []);
+
+  // Use customer snapshot (required, no fallback)
+  const displayCustomer = invoice.customerSnapshot;
+
+  if (!displayCustomer) {
+    return null;
+  }
 
   return (
     <Paper
