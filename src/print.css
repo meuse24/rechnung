@@ -45,6 +45,7 @@
   body {
     font-size: 11pt;
     line-height: 1.35;
+    counter-reset: page;
   }
 
   /* Keine Hintergrundfarben beim Drucken */
@@ -93,6 +94,7 @@
     font-size: 9pt;
     color: #444 !important;
     text-align: right;
+    counter-increment: page;
   }
 
   .print-footer::after {

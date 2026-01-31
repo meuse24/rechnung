@@ -76,7 +76,7 @@ export async function generatePDF(element: HTMLElement, filename: string): Promi
     // Add page numbers (bottom-right)
     const pageCount = pdf.getNumberOfPages();
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
+    pdf.setFontSize(4.5);
     pdf.setTextColor(0, 0, 0);
     for (let page = 1; page <= pageCount; page += 1) {
       pdf.setPage(page);
