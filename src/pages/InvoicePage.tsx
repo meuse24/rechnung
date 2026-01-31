@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Container, Stack, Alert } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconInfoCircle, IconCheck, IconAlertCircle } from '@tabler/icons-react';
@@ -61,18 +61,7 @@ export function InvoicePage() {
     if (invoiceId === 'new' && companySettings?.defaultNotes && !invoice.notes) {
       setInvoice((prev) => ({ ...prev, notes: companySettings.defaultNotes || '' }));
     }
-  }, [invoiceId, companySettings?.defaultNotes]);
-
-  // Auto-trigger PDF export wenn von Liste gestartet (nur einmal!)
-  useEffect(() => {
-    if (location.state?.exportPdf && invoice.invoiceNumber && !pdfExportTriggered.current) {
-      pdfExportTriggered.current = true;
-      const timer = setTimeout(() => {
-        handlePDFExport();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [location.state?.exportPdf, invoice.invoiceNumber]);
+  }, [invoiceId, companySettings?.defaultNotes, invoice.notes]);
 
   const addLine = () => {
     setInvoice({
@@ -98,6 +87,15 @@ export function InvoicePage() {
     newLines[index] = { ...newLines[index], [field]: value };
     setInvoice({ ...invoice, lines: newLines });
   };
+
+  // Create live preview invoice with snapshots for calculations and display
+  const previewInvoice = useMemo(() => {
+    return createInvoiceSnapshot(invoice, customers, services);
+  }, [invoice, customers, services]);
+
+  // Berechnungen
+  const totals = calculateInvoiceTotals(previewInvoice, services);
+  const selectedCustomer = customers.find((c) => c.id === invoice.customerId);
 
   const handleSave = () => {
     if (!invoice.invoiceNumber || !invoice.customerId) {
@@ -144,7 +142,7 @@ export function InvoicePage() {
     navigate('/invoices');
   };
 
-  const handlePDFExport = async () => {
+  const handlePDFExport = useCallback(async () => {
     if (!invoice.invoiceNumber || !invoice.customerId) {
       notifications.show({
         title: 'Fehler',
@@ -177,20 +175,22 @@ export function InvoicePage() {
       });
       console.error(error);
     }
-  };
+  }, [invoice, previewInvoice, selectedCustomer, services, companySettings]);
+
+  // Auto-trigger PDF export wenn von Liste gestartet (nur einmal!)
+  useEffect(() => {
+    if (location.state?.exportPdf && invoice.invoiceNumber && !pdfExportTriggered.current) {
+      pdfExportTriggered.current = true;
+      const timer = setTimeout(() => {
+        handlePDFExport();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state?.exportPdf, invoice.invoiceNumber, handlePDFExport]);
 
   const handleBack = () => {
     navigate('/invoices');
   };
-
-  // Create live preview invoice with snapshots for calculations and display
-  const previewInvoice = useMemo(() => {
-    return createInvoiceSnapshot(invoice, customers, services);
-  }, [invoice, customers, services]);
-
-  // Berechnungen
-  const totals = calculateInvoiceTotals(previewInvoice, services);
-  const selectedCustomer = customers.find((c) => c.id === invoice.customerId);
 
   const customerOptions = customers.map((c) => ({
     value: c.id,

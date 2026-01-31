@@ -19,20 +19,38 @@ Dieses Projekt demonstriert:
 2. **Leistungsverwaltung**: Stundenleistungen mit Stundensatz und Steuersatz verwalten
 3. **Firmenstammdaten**: Briefkopf, Bankverbindung, Zahlungsbedingungen hinterlegen
 4. **Datensicherung**: Export/Import aller Daten als JSON-Backup (Browser-Migration, Backup)
-5. **Rechnungserstellung**: Formular zum Erstellen einer Rechnung
-6. **JSON Export/Import**: Rechnung als JSON speichern und laden
-7. **Druckfunktion**: Browser-Print mit Firmendaten, Zahlungsbedingungen & Bankverbindung
-8. **Hilfe & Anleitung**: Umfassende Schritt-für-Schritt Anleitung integriert (Hilfe-Button rechts oben)
-9. **Österreichische Lokalisierung**: Standard-Land AT, Komma-Eingabe für Zahlen (8,5 statt 8.5)
-10. **Single-File Build**: Komplette App in einer einzigen index.html (ca. 660 KB)
+5. **Rechnungsverwaltung**: Vollständige Rechnungshistorie mit Status-Tracking (Entwurf, Versendet, Bezahlt, Storniert)
+6. **Rechnungsformular**: Erstellen und Bearbeiten von Rechnungen mit automatischen Berechnungen
+7. **PDF-Export**: Professioneller PDF-Export mit @react-pdf/renderer inkl. Zahlungsbedingungen & Bankverbindung
+8. **Dark/Light Mode**: Umschaltbarer Farbmodus mit WCAG AAA konformen Kontrasten
+9. **High-Contrast Theme**: Barrierefreies Design mit verstärkten Rahmen und optimierter Lesbarkeit
+10. **Hilfe & Anleitung**: Umfassende Schritt-für-Schritt Anleitung integriert (Hilfe-Button rechts oben)
+11. **Österreichische Lokalisierung**: Standard-Land AT, Komma-Eingabe für Zahlen (8,5 statt 8.5)
+12. **CSV-Import**: Massenimport von Kunden und Leistungen mit Vorlagen-Download
+13. **Single-File Build**: Komplette App in einer einzigen index.html (ca. 2.3 MB, gzip: 720 KB)
+
+## Accessibility & Theme
+
+Die App verfügt über ein **High-Contrast Mantine v7 Theme** mit WCAG AAA Compliance:
+
+- **Dark/Light Mode**: Toggle-Button im Header für Farbschema-Wechsel
+- **Verstärkte Rahmen**: 1.5-2px Rahmenbreite für bessere Sichtbarkeit
+- **Optimierte Kontraste**: 16.1:1 für Labels, 8.6:1 für ausgewählte Optionen
+- **Focus-States**: Immer sichtbare 2px blaue Umrandung bei Tastaturfokus
+- **Dropdown-Highlighting**: Blaue Hinterlegung für ausgewählte Optionen
+- **Lesbarkeit**: Erhöhte Schriftstärken und optimierte Farben
+
+Details: siehe [THEME_GUIDE.md](THEME_GUIDE.md)
 
 ## Tech Stack
 
 - **Framework**: Vite + React 18 + TypeScript
-- **UI Library**: Mantine v7
+- **UI Library**: Mantine v7 mit High-Contrast Theme (WCAG AAA)
+- **PDF Export**: @react-pdf/renderer
+- **CSV Parsing**: papaparse
 - **Routing**: React Router v6
-- **State Management**: React Hooks (useState, useEffect)
-- **Persistierung**: LocalStorage
+- **State Management**: React Hooks (useState, useEffect, useRef, useMemo)
+- **Persistierung**: LocalStorage mit Cross-Tab Synchronization
 - **Code Quality**: ESLint mit TypeScript & React Hooks
 - **Build**: vite-plugin-singlefile (Single-File Output)
 
@@ -60,26 +78,46 @@ npm preview
 ```
 src/
 ├── app/
-│   └── Layout.tsx              # App-Layout mit Navigation
+│   └── Layout.tsx                      # App-Layout mit Navigation & Dark Mode Toggle
 ├── pages/
-│   ├── CustomersPage.tsx       # Kundenverwaltung (CRUD)
-│   ├── ServicesPage.tsx        # Leistungsverwaltung (CRUD)
-│   └── InvoicePage.tsx         # Rechnungsformular
+│   ├── CustomersPage.tsx               # Kundenverwaltung (CRUD + CSV Import)
+│   ├── ServicesPage.tsx                # Leistungsverwaltung (CRUD + CSV Import)
+│   ├── InvoicesListPage.tsx            # Rechnungshistorie & Übersicht
+│   ├── InvoicePage.tsx                 # Rechnungsformular
+│   ├── SettingsPage.tsx                # Firmenstammdaten & Datenexport
+│   └── HelpPage.tsx                    # Hilfe & Anleitung
 ├── components/
-│   ├── CustomerFormModal.tsx   # Kunde hinzufügen/bearbeiten
-│   ├── ServiceFormModal.tsx    # Leistung hinzufügen/bearbeiten
-│   ├── ConfirmDeleteModal.tsx  # Bestätigungsdialog
-│   └── InvoicePrintView.tsx    # Druckansicht
+│   ├── invoice/                        # Modularisierte Rechnungskomponenten
+│   │   ├── InvoicePageHeader.tsx       # Rechnungskopf mit Aktionen
+│   │   ├── InvoiceHeaderForm.tsx       # Formular für Rechnungskopf
+│   │   ├── InvoiceLinesEditor.tsx      # Positionen-Editor
+│   │   ├── InvoiceTotalsPanel.tsx      # Summenanzeige
+│   │   └── InvoiceNotesPanel.tsx       # Notizen-Editor
+│   ├── InvoicePdfDocument.tsx          # PDF-Dokumentkomponente
+│   ├── InvoicePrintView.tsx            # Druckansicht
+│   ├── CustomerFormModal.tsx           # Kunde hinzufügen/bearbeiten
+│   ├── ServiceFormModal.tsx            # Leistung hinzufügen/bearbeiten
+│   └── ConfirmDeleteModal.tsx          # Bestätigungsdialog
+├── hooks/
+│   └── useInvoiceDependencies.ts       # Hook für Rechnungsabhängigkeiten
 ├── models/
-│   └── types.ts                # TypeScript Datenmodelle
+│   └── types.ts                        # TypeScript Datenmodelle
 ├── storage/
-│   └── localStorage.ts         # LocalStorage Helper
+│   ├── localStorage.ts                 # LocalStorage Helper
+│   └── invoices.ts                     # Rechnungs-Persistierung
 ├── utils/
-│   ├── money.ts                # Geld-Formatierung
-│   └── calc.ts                 # Rechnungs-Berechnungen
-├── print.css                   # Print Styles
-├── App.tsx                     # Root Component
-└── main.tsx                    # Entry Point
+│   ├── money.ts                        # Geld-Formatierung
+│   ├── calc.ts                         # Rechnungs-Berechnungen
+│   ├── date.ts                         # Datum-Formatierung
+│   ├── invoice.ts                      # Invoice Snapshot Logic
+│   ├── pdfExport.tsx                   # PDF-Generierung
+│   ├── dataExport.ts                   # JSON Export/Import
+│   └── csvTemplates.ts                 # CSV-Vorlagen
+├── theme.ts                            # Mantine Theme (High-Contrast)
+├── theme.css                           # Zusätzliche Theme-Styles
+├── print.css                           # Print Styles
+├── App.tsx                             # Root Component
+└── main.tsx                            # Entry Point
 ```
 
 ## Datenmodelle
@@ -168,7 +206,7 @@ Das Projekt nutzt `vite-plugin-singlefile` für einen optimierten Build:
 npm run build
 ```
 
-Erzeugt **nur eine einzige Datei**: `dist/index.html` (ca. 660 KB, gzip: 171 KB)
+Erzeugt **nur eine einzige Datei**: `dist/index.html` (ca. 2.3 MB, gzip: 720 KB)
 
 - Alle JavaScript-Module inline
 - Alle CSS-Styles inline
