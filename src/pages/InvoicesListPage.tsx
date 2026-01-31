@@ -22,7 +22,8 @@ import {
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { Invoice, Customer, Service, InvoiceStatus } from '@/models/types';
-import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
+import { loadFromStorage, STORAGE_KEYS } from '@/storage/localStorage';
+import { loadInvoices, saveInvoices as persistInvoices } from '@/storage/invoices';
 import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
@@ -38,7 +39,7 @@ export function InvoicesListPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const loadedInvoices = loadFromStorage<Invoice[]>(STORAGE_KEYS.INVOICES, []);
+    const loadedInvoices = loadInvoices();
     const loadedCustomers = loadFromStorage<Customer[]>(STORAGE_KEYS.CUSTOMERS, []);
     const loadedServices = loadFromStorage<Service[]>(STORAGE_KEYS.SERVICES, []);
 
@@ -49,7 +50,7 @@ export function InvoicesListPage() {
 
   const saveInvoices = (newInvoices: Invoice[]) => {
     setInvoices(newInvoices);
-    saveToStorage(STORAGE_KEYS.INVOICES, newInvoices);
+    persistInvoices(newInvoices);
   };
 
   const handleNew = () => {
