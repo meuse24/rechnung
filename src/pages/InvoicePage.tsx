@@ -3,14 +3,10 @@ import { Container, Stack, Alert } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Customer,
-  Service,
   Invoice,
   InvoiceLine,
-  CompanySettings,
   InvoiceStatus,
 } from '@/models/types';
-import { loadFromStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { loadInvoices, saveInvoices } from '@/storage/invoices';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
@@ -22,16 +18,13 @@ import { InvoiceLinesEditor } from '@/components/invoice/InvoiceLinesEditor';
 import { InvoiceTotalsPanel } from '@/components/invoice/InvoiceTotalsPanel';
 import { InvoiceNotesPanel } from '@/components/invoice/InvoiceNotesPanel';
 import { InvoicePageHeader } from '@/components/invoice/InvoicePageHeader';
+import { useInvoiceDependencies } from '@/hooks/useInvoiceDependencies';
 
 export function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
-  const [companySettings, setCompanySettings] = useState<CompanySettings | undefined>(
-    undefined
-  );
+  const { customers, services, companySettings } = useInvoiceDependencies();
   const [invoice, setInvoice] = useState<Invoice>({
     id: crypto.randomUUID(),
     invoiceNumber: '',
@@ -44,16 +37,6 @@ export function InvoicePage() {
 
   // Laden von Stammdaten und Rechnung beim Mount
   useEffect(() => {
-    const loadedCustomers = loadFromStorage<Customer[]>(STORAGE_KEYS.CUSTOMERS, []);
-    const loadedServices = loadFromStorage<Service[]>(STORAGE_KEYS.SERVICES, []);
-    const loadedSettings = loadFromStorage<CompanySettings | undefined>(
-      STORAGE_KEYS.COMPANY_SETTINGS,
-      undefined
-    );
-    setCustomers(loadedCustomers);
-    setServices(loadedServices);
-    setCompanySettings(loadedSettings);
-
     // Rechnung laden wenn ID vorhanden und nicht "new"
     if (invoiceId && invoiceId !== 'new') {
       const allInvoices = loadInvoices();
