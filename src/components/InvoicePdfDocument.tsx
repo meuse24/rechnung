@@ -113,6 +113,22 @@ const styles = StyleSheet.create({
   notesText: {
     fontSize: 9,
   },
+  footerSection: {
+    marginTop: 20,
+    paddingTop: 10,
+    borderTop: '1 solid #ddd',
+  },
+  footerTitle: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    color: '#666',
+    marginBottom: 4,
+    marginTop: 8,
+  },
+  footerText: {
+    fontSize: 8,
+    marginBottom: 2,
+  },
   pageNumber: {
     position: 'absolute',
     fontSize: 9,
@@ -269,8 +285,36 @@ export function InvoicePdfDocument({
         {/* Notes */}
         {invoice.notes && (
           <View style={styles.notesSection}>
-            <Text style={styles.notesTitle}>Zahlungsbedingungen</Text>
+            <Text style={styles.notesTitle}>Anmerkungen</Text>
             <Text style={styles.notesText}>{invoice.notes}</Text>
+          </View>
+        )}
+
+        {/* Payment Terms and Bank Details */}
+        {companySettings && (companySettings.paymentTerms || companySettings.iban) && (
+          <View style={styles.footerSection}>
+            {companySettings.paymentTerms && (
+              <View>
+                <Text style={styles.footerTitle}>Zahlungsbedingungen</Text>
+                <Text style={styles.footerText}>{companySettings.paymentTerms}</Text>
+              </View>
+            )}
+
+            {companySettings.iban && (
+              <View>
+                <Text style={styles.footerTitle}>Bankverbindung</Text>
+                {companySettings.bankName && (
+                  <Text style={styles.footerText}>Bank: {companySettings.bankName}</Text>
+                )}
+                {companySettings.accountHolder && (
+                  <Text style={styles.footerText}>Kontoinhaber: {companySettings.accountHolder}</Text>
+                )}
+                <Text style={styles.footerText}>IBAN: {companySettings.iban}</Text>
+                {companySettings.bic && (
+                  <Text style={styles.footerText}>BIC: {companySettings.bic}</Text>
+                )}
+              </View>
+            )}
           </View>
         )}
 
