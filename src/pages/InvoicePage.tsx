@@ -31,6 +31,7 @@ import {
 import { loadFromStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { loadInvoices, saveInvoices } from '@/storage/invoices';
 import { calculateInvoiceTotals } from '@/utils/calc';
+import { formatCurrency } from '@/utils/money';
 import { InvoicePrintView } from '@/components/InvoicePrintView';
 import { generatePDF, generatePDFFilename } from '@/utils/pdfExport';
 import { createInvoiceSnapshot } from '@/utils/invoice';
