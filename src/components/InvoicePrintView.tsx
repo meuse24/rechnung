@@ -2,6 +2,7 @@ import { Paper, Text, Table, Divider, Stack, Group } from '@mantine/core';
 import { Invoice, Customer, Service, CompanySettings } from '@/models/types';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
+import { formatGermanDate } from '@/utils/date';
 
 interface InvoicePrintViewProps {
   invoice: Invoice;
@@ -26,8 +27,12 @@ export function InvoicePrintView({
   }
 
   return (
-    <Paper className="print-only" p="xl" style={{ maxWidth: 800, margin: '0 auto' }}>
-      <Stack gap="xl">
+    <Paper
+      className="print-only"
+      p="lg"
+      style={{ maxWidth: 800, margin: '0 auto', border: 'none', boxShadow: 'none' }}
+    >
+      <Stack gap="sm">
         {/* Firmenkopf / Absender */}
         {companySettings && companySettings.companyName && (
           <div>
@@ -45,7 +50,7 @@ export function InvoicePrintView({
             {companySettings.email && <Text size="sm">E-Mail: {companySettings.email}</Text>}
             {companySettings.website && <Text size="sm">{companySettings.website}</Text>}
 
-            <Group gap="xl" mt="xs">
+            <Group gap="sm" mt="xs">
               {companySettings.taxId && (
                 <Text size="xs" c="dimmed">
                   Steuernr.: {companySettings.taxId}
@@ -60,7 +65,7 @@ export function InvoicePrintView({
           </div>
         )}
 
-        <Divider my="md" />
+        <Divider my="xs" />
 
         {/* Header */}
         <div>
@@ -78,12 +83,12 @@ export function InvoicePrintView({
               <Text size="sm" c="dimmed">
                 Datum
               </Text>
-              <Text fw={600}>{invoice.issueDate}</Text>
+              <Text fw={600}>{formatGermanDate(invoice.issueDate)}</Text>
             </div>
           </Group>
         </div>
 
-        <Divider />
+        <Divider my="xs" />
 
         {/* Kundendetails */}
         <div>
@@ -99,11 +104,11 @@ export function InvoicePrintView({
           {displayCustomer.email && <Text size="sm">{displayCustomer.email}</Text>}
         </div>
 
-        <Divider />
+        <Divider my="xs" />
 
         {/* Positionen */}
         <div>
-          <Text fw={600} mb="md">
+          <Text fw={600} mb="xs">
             Leistungen
           </Text>
           <Table>
@@ -151,7 +156,7 @@ export function InvoicePrintView({
           </Table>
         </div>
 
-        <Divider />
+        <Divider my="xs" />
 
         {/* Summen */}
         <div style={{ marginLeft: 'auto', width: 300 }}>
@@ -164,7 +169,7 @@ export function InvoicePrintView({
               <Text>Mehrwertsteuer:</Text>
               <Text>{formatCurrency(totals.taxTotal)}</Text>
             </Group>
-            <Divider />
+            <Divider my="xs" />
             <Group justify="space-between">
               <Text fw={700} size="lg">
                 Gesamtbetrag:
@@ -179,7 +184,7 @@ export function InvoicePrintView({
         {/* Notizen */}
         {invoice.notes && (
           <>
-            <Divider />
+            <Divider my="xs" />
             <div>
               <Text size="sm" c="dimmed" mb="xs">
                 Hinweise
@@ -194,7 +199,7 @@ export function InvoicePrintView({
         {/* Zahlungsbedingungen */}
         {companySettings && companySettings.paymentTerms && (
           <>
-            <Divider />
+            <Divider my="xs" />
             <div>
               <Text size="sm" c="dimmed" mb="xs">
                 Zahlungsbedingungen
@@ -226,6 +231,7 @@ export function InvoicePrintView({
           </>
         )}
       </Stack>
+      <div className="print-footer" aria-hidden="true" />
     </Paper>
   );
 }

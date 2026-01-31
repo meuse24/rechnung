@@ -26,6 +26,7 @@ import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localSto
 import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
+import { formatGermanDate } from '@/utils/date';
 
 export function InvoicesListPage() {
   const navigate = useNavigate();
@@ -115,10 +116,12 @@ export function InvoicesListPage() {
   const filteredInvoices = invoices.filter((invoice) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
+    const formattedDate = formatGermanDate(invoice.issueDate).toLowerCase();
     return (
       invoice.invoiceNumber.toLowerCase().includes(term) ||
       getCustomerName(invoice.customerId).toLowerCase().includes(term) ||
-      invoice.issueDate.includes(term)
+      invoice.issueDate.includes(term) ||
+      formattedDate.includes(term)
     );
   });
 
@@ -176,7 +179,7 @@ export function InvoicesListPage() {
                       <Table.Td>
                         <Text fw={500}>{invoice.invoiceNumber}</Text>
                       </Table.Td>
-                      <Table.Td>{invoice.issueDate}</Table.Td>
+                      <Table.Td>{formatGermanDate(invoice.issueDate)}</Table.Td>
                       <Table.Td>{getCustomerName(invoice.customerId)}</Table.Td>
                       <Table.Td>{formatCurrency(totals.netTotal)}</Table.Td>
                       <Table.Td>
