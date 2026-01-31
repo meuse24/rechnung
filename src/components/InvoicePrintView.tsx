@@ -8,7 +8,7 @@ import { formatGermanDate } from '@/utils/date';
 const PAGE_WIDTH_MM = 210;
 const PAGE_HEIGHT_MM = 297;
 const PAGE_MARGIN_MM = 15;
-const FOOTER_OFFSET_PX = 2;
+const FOOTER_OFFSET_PX = -6;
 
 const getPageContentHeightPx = (container: HTMLElement): number => {
   const contentWidthMm = PAGE_WIDTH_MM - PAGE_MARGIN_MM * 2;
