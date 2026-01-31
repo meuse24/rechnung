@@ -13,9 +13,8 @@ Eine Rechnungs-Webapp (Vite + React + TypeScript) mit vollständiger Rechnungsve
 4. **Rechnungshistorie** mit vollständiger Verwaltung aller Rechnungen
 5. **Status-Tracking** für Rechnungen (Entwurf, Versendet, Bezahlt, Storniert)
 6. **Rechnungsformular** zum Erstellen und Bearbeiten von Rechnungen
-7. **PDF-Export** mit direktem Download
-8. **Druckfunktion** (Browser Print mit Firmendaten)
-9. **Vollständiger Datenexport/-import** für Backup und Browser-Migration
+7. **PDF-Export** mit professioneller Formatierung und direktem Download
+8. **Vollständiger Datenexport/-import** für Backup und Browser-Migration
 10. **Integrierte Hilfe & Anleitung** für alle Funktionen
 11. **Österreichische Lokalisierung** (AT als Standard, Komma-Eingabe für Zahlen)
 12. **Single-File Build** (nur eine index.html für einfaches Deployment)
@@ -31,7 +30,7 @@ Eine Rechnungs-Webapp (Vite + React + TypeScript) mit vollständiger Rechnungsve
 - **Validation**: Einfache Pflichtfeld-Checks + CSV-Validierung
 - **Persistence**: LocalStorage (keine DB, kein Backend)
 - **CSV Parsing**: papaparse
-- **PDF Export**: jsPDF + html2canvas
+- **PDF Export**: @react-pdf/renderer
 - **Linting**: ESLint mit TypeScript & React Hooks Plugins
 - **Build**: Single-File Build (vite-plugin-singlefile) - nur index.html im dist-Ordner
 
@@ -561,34 +560,56 @@ export default defineConfig({
 
 ---
 
-### ✅ Schritt 13: PDF Export (ERLEDIGT)
+### ✅ Schritt 13: PDF Export mit @react-pdf/renderer (ERLEDIGT)
 - [x] PDF-Export-Button auf Rechnungsseite
 - [x] Direkter PDF-Download ohne Browser-Druckdialog
 - [x] Automatische Dateinamen-Generierung
-- [x] Professional PDF-Formatierung
+- [x] Professionelle PDF-Formatierung mit voller Kontrolle
+- [x] Präzise Schriftgrößen und Layout
+- [x] Druckfunktion entfernt (Fokus auf PDF-Export)
+- [x] Notifications statt Alert-Dialoge
+- [x] PDF-Export aus Rechnungsübersicht
 
-**Utility**:
-- pdfExport.ts - PDF-Generierung mit jsPDF und html2canvas
+**Komponenten & Utilities**:
+- InvoicePdfDocument.tsx - Deklarative PDF-Komponente mit React-PDF
+- pdfExport.tsx - PDF-Generierung und Download
+- invoice/InvoicePageHeader.tsx - Modularisierter Header ohne Druck-Button
+- invoice/InvoiceHeaderForm.tsx - Rechnungskopf-Formular
+- invoice/InvoiceLinesEditor.tsx - Positionen-Editor
+- invoice/InvoiceTotalsPanel.tsx - Summen-Anzeige
+- invoice/InvoiceNotesPanel.tsx - Notizen-Editor
 
 **Libraries**:
-- jsPDF - PDF-Generierung
-- html2canvas - HTML zu Canvas Konvertierung
+- @react-pdf/renderer - Professionelle PDF-Generierung
+- @mantine/notifications - Toast-Benachrichtigungen
+- pako - Compression (Dependency von @react-pdf/renderer)
 
 **Features**:
-- **"Als PDF" Button**: Auf Rechnungsseite neben "Drucken"
-- **Konvertierung**: InvoicePrintView HTML → Canvas → PDF
+- **"Als PDF" Button**: Auf Rechnungsseite und in Rechnungsübersicht
+- **Deklarative PDF-Erstellung**: React-Components für PDF-Layout
+- **Präzise Kontrolle**: Exakte Schriftgrößen (Body: 10pt, Tabellen: 9pt, Titel: 14-16pt)
 - **Format**: A4, Portrait, automatische Seitenumbrüche
-- **Qualität**: Scale 2 für hohe Auflösung
-- **Dateiname**: RE-{invoiceNumber}-{customerName}.pdf
+- **Automatische Seitenzahlen**: React-PDF Feature mit "Seite X / Y"
+- **Dateiname**: {invoiceNumber}-{customerName}.pdf
 - **Deaktiviert**: Wenn Rechnung keine Nummer oder Kunde hat
-- **Fehlerbehandlung**: User-Feedback bei Fehlern
+- **Fehlerbehandlung**: Toast-Notifications statt Alerts
+- **Auto-Export**: Klick auf PDF-Icon in Liste → automatischer Export nach Laden
 
 **Technische Details**:
-- html2canvas rendert DOM-Element als Canvas
-- jsPDF erstellt PDF aus Canvas-Image
-- Automatische Berechnung von Seitenhöhen
-- Multi-Page Support für lange Rechnungen
+- Direkte PDF-Generierung ohne Canvas-Zwischenschritt
+- StyleSheet-basiertes Layout (ähnlich React Native)
+- Kleinere Dateigröße als html2canvas-Lösung
+- Keine Skalierungsprobleme
 - Filename-Sanitization (entfernt Sonderzeichen)
+- Snapshot-Model für Invoice-Immutability (customerSnapshot, line snapshots)
+
+**Code-Qualität Verbesserungen**:
+- Alert-Dialoge durch Mantine Notifications ersetzt
+- Error-Handling in useInvoiceDependencies (loading/error states, storage events)
+- Type-safe Status-Validierung in InvoiceHeaderForm
+- Null-Checks und Fallbacks in createInvoiceSnapshot
+- Modularisierung der Invoice-Komponenten
+- CSV-Helper zentralisiert (parseCsvFile, parseLocaleNumber)
 
 ---
 
@@ -632,10 +653,17 @@ src/
 ├── components/
 │   ├── CustomerFormModal.tsx       # Kunde hinzufügen/bearbeiten
 │   ├── ServiceFormModal.tsx        # Leistung hinzufügen/bearbeiten
-│   ├── CustomerCSVImportModal.tsx  # CSV Import für Kunden (NEU)
-│   ├── ServiceCSVImportModal.tsx   # CSV Import für Leistungen (NEU)
+│   ├── CustomerCSVImportModal.tsx  # CSV Import für Kunden
+│   ├── ServiceCSVImportModal.tsx   # CSV Import für Leistungen
 │   ├── ConfirmDeleteModal.tsx      # Bestätigungsdialog
-│   └── InvoicePrintView.tsx        # Druckansicht mit Firmendaten
+│   ├── InvoicePrintView.tsx        # Browser-Druckansicht (legacy)
+│   ├── InvoicePdfDocument.tsx      # PDF-Dokument mit @react-pdf/renderer (NEU)
+│   └── invoice/                    # Modularisierte Invoice-Komponenten (NEU)
+│       ├── InvoicePageHeader.tsx   # Header mit Buttons (ohne Druck)
+│       ├── InvoiceHeaderForm.tsx   # Rechnungskopf-Formular
+│       ├── InvoiceLinesEditor.tsx  # Positionen-Editor
+│       ├── InvoiceTotalsPanel.tsx  # Summen-Anzeige
+│       └── InvoiceNotesPanel.tsx   # Notizen-Editor
 ├── models/
 │   └── types.ts                    # TypeScript Datenmodelle + InvoiceStatus
 ├── storage/
@@ -643,9 +671,12 @@ src/
 ├── utils/
 │   ├── money.ts                    # Geld-Formatierung
 │   ├── calc.ts                     # Rechnungs-Berechnungen
+│   ├── date.ts                     # Datums-Formatierung (Deutsch)
+│   ├── invoice.ts                  # Invoice Snapshot Helper (NEU)
+│   ├── csvImport.ts                # CSV-Import Helper (parseCsvFile, parseLocaleNumber) (NEU)
 │   ├── dataExport.ts               # Export/Import Utilities (v2.0.0)
-│   ├── csvTemplates.ts             # CSV-Vorlagen Download (NEU)
-│   └── pdfExport.ts                # PDF-Generierung (NEU)
+│   ├── csvTemplates.ts             # CSV-Vorlagen Download
+│   └── pdfExport.tsx               # PDF-Generierung mit @react-pdf/renderer (NEU)
 ├── print.css                       # Print Styles
 ├── App.tsx                         # Root Component (Routes aktualisiert)
 └── main.tsx                        # Entry Point
@@ -727,13 +758,14 @@ Alle 13 Entwicklungsschritte wurden erfolgreich implementiert:
 - **Datenmodelle**: 7 TypeScript Interfaces
   - Customer, Service, Invoice, InvoiceLine, InvoiceStatus (NEU), CompanySettings, ExportData
 - **Dependencies**:
-  - Core: React, Mantine, React Router, TypeScript
+  - Core: React, Mantine (@mantine/core, @mantine/notifications), React Router, TypeScript
   - Tools: ESLint, vite-plugin-singlefile
-  - Libraries: papaparse, jsPDF, html2canvas (NEU)
-- **Build Output**: Single-File (nur index.html) - ~700 kB (gzip: ~180 kB)
+  - Libraries: papaparse, @react-pdf/renderer, pako
+- **Build Output**: Single-File (nur index.html) - ~2.3 MB (gzip: ~720 kB)
   - Alle CSS und JavaScript inline eingebettet
   - Keine separaten Asset-Dateien
   - Einfach zu deployen: nur 1 Datei
+  - Größer durch @react-pdf/renderer, aber bessere PDF-Qualität
 
 ### Code-Qualität & Linting
 

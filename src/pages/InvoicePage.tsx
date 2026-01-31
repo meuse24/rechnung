@@ -138,11 +138,10 @@ export function InvoicePage() {
   };
 
   const handlePDFExport = async () => {
-    const printElement = document.querySelector('.print-only') as HTMLElement;
-    if (!printElement) {
+    if (!invoice.invoiceNumber || !invoice.customerId) {
       notifications.show({
         title: 'Fehler',
-        message: 'Druckansicht nicht gefunden.',
+        message: 'Bitte speichern Sie die Rechnung zuerst.',
         color: 'red',
         icon: <IconAlertCircle size={16} />,
       });
@@ -153,24 +152,8 @@ export function InvoicePage() {
     const filename = generatePDFFilename(invoice.invoiceNumber, customerName);
 
     try {
-      // Temporarily make element visible for html2canvas
-      const originalDisplay = printElement.style.display;
-      const originalPosition = printElement.style.position;
-      const originalLeft = printElement.style.left;
-
-      printElement.style.display = 'block';
-      printElement.style.position = 'fixed';
-      printElement.style.left = '-9999px';
-      printElement.style.top = '0';
-
-      // Generate PDF
-      await generatePDF(printElement, filename);
-
-      // Restore original styles
-      printElement.style.display = originalDisplay;
-      printElement.style.position = originalPosition;
-      printElement.style.left = originalLeft;
-      printElement.style.top = '';
+      // Generate PDF using react-pdf
+      await generatePDF(previewInvoice, selectedCustomer, services, companySettings, filename);
 
       notifications.show({
         title: 'Erfolg',
