@@ -45,7 +45,6 @@
   body {
     font-size: 11pt;
     line-height: 1.35;
-    counter-reset: page;
   }
 
   /* Keine Hintergrundfarben beim Drucken */
@@ -85,30 +84,19 @@
     page-break-inside: avoid;
   }
 
-  /* Seitenzahlen im Footer */
-  .print-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
+  /* Seitenzahlen (werden per JS platziert) */
+  .print-page-number {
+    position: absolute;
     right: 0;
     font-size: 9pt;
     color: #444 !important;
     text-align: right;
-    counter-increment: page;
-  }
-
-  .print-footer::after {
-    content: "Seite " counter(page);
   }
 }
 
 /* Print-View standardmäßig ausblenden (nur im Browser) */
 @media screen {
   .print-only {
-    display: none;
-  }
-
-  .print-footer {
     display: none;
   }
 }

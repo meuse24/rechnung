@@ -1,8 +1,40 @@
+import { useEffect, useRef } from 'react';
 import { Paper, Text, Table, Divider, Stack, Group } from '@mantine/core';
 import { Invoice, Customer, Service, CompanySettings } from '@/models/types';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
 import { formatGermanDate } from '@/utils/date';
+
+const PAGE_HEIGHT_MM = 297;
+const PAGE_MARGIN_TOP_MM = 15;
+const PAGE_MARGIN_BOTTOM_MM = 15;
+const FOOTER_OFFSET_PX = 12;
+const PX_PER_MM = 96 / 25.4;
+const PAGE_CONTENT_HEIGHT_PX = Math.floor(
+  (PAGE_HEIGHT_MM - PAGE_MARGIN_TOP_MM - PAGE_MARGIN_BOTTOM_MM) * PX_PER_MM
+);
+
+const clearPrintPageNumbers = (container: HTMLElement | null) => {
+  if (!container) return;
+  container.querySelectorAll('.print-page-number').forEach((node) => node.remove());
+};
+
+const addPrintPageNumbers = (container: HTMLElement | null) => {
+  if (!container) return;
+  clearPrintPageNumbers(container);
+
+  const contentHeight = container.scrollHeight;
+  if (!contentHeight || PAGE_CONTENT_HEIGHT_PX <= 0) return;
+
+  const pageCount = Math.max(1, Math.ceil(contentHeight / PAGE_CONTENT_HEIGHT_PX));
+  for (let page = 1; page <= pageCount; page += 1) {
+    const marker = document.createElement('div');
+    marker.className = 'print-page-number';
+    marker.textContent = `Seite ${page} / ${pageCount}`;
+    marker.style.top = `${page * PAGE_CONTENT_HEIGHT_PX - FOOTER_OFFSET_PX}px`;
+    container.appendChild(marker);
+  }
+};
 
 interface InvoicePrintViewProps {
   invoice: Invoice;
@@ -18,6 +50,7 @@ export function InvoicePrintView({
   companySettings,
 }: InvoicePrintViewProps) {
   const totals = calculateInvoiceTotals(invoice, services);
+  const printRef = useRef<HTMLDivElement | null>(null);
 
   // Use customer snapshot (required, no fallback)
   const displayCustomer = invoice.customerSnapshot;
@@ -26,8 +59,42 @@ export function InvoicePrintView({
     return null;
   }
 
+  useEffect(() => {
+    const handleBeforePrint = () => addPrintPageNumbers(printRef.current);
+    const handleAfterPrint = () => clearPrintPageNumbers(printRef.current);
+
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    const mediaQuery = window.matchMedia('print');
+    const handleChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        handleBeforePrint();
+      } else {
+        handleAfterPrint();
+      }
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+      if (mediaQuery.addEventListener) {
+        mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
   return (
     <Paper
+      ref={printRef}
       className="print-only"
       p="lg"
       style={{ maxWidth: 800, margin: '0 auto', border: 'none', boxShadow: 'none' }}
@@ -231,7 +298,6 @@ export function InvoicePrintView({
           </>
         )}
       </Stack>
-      <div className="print-footer" aria-hidden="true" />
     </Paper>
   );
 }
