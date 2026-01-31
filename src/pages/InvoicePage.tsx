@@ -33,7 +33,6 @@ import {
   InvoiceLine,
   CompanySettings,
   InvoiceStatus,
-  CustomerSnapshot,
 } from '@/models/types';
 import { loadFromStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { loadInvoices, saveInvoices } from '@/storage/invoices';
@@ -41,6 +40,7 @@ import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
 import { InvoicePrintView } from '@/components/InvoicePrintView';
 import { generatePDF, generatePDFFilename } from '@/utils/pdfExport';
+import { createInvoiceSnapshot } from '@/utils/invoice';
 
 export function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -116,38 +116,6 @@ export function InvoicePage() {
     setInvoice({ ...invoice, lines: newLines });
   };
 
-  const createInvoiceSnapshot = (): Invoice => {
-    // Create customer snapshot
-    const customer = customers.find((c) => c.id === invoice.customerId);
-    const customerSnapshot: CustomerSnapshot | undefined = customer
-      ? {
-          name: customer.name,
-          addressLine1: customer.addressLine1,
-          postalCode: customer.postalCode,
-          city: customer.city,
-          countryCode: customer.countryCode,
-          email: customer.email,
-        }
-      : undefined;
-
-    // Create line snapshots
-    const linesWithSnapshots: InvoiceLine[] = invoice.lines.map((line) => {
-      const service = services.find((s) => s.id === line.serviceId);
-      return {
-        ...line,
-        description: service?.name,
-        hourlyRate: service?.hourlyRate,
-        taxRate: service?.taxRate,
-      };
-    });
-
-    return {
-      ...invoice,
-      customerSnapshot,
-      lines: linesWithSnapshots,
-    };
-  };
-
   const handleSave = () => {
     if (!invoice.invoiceNumber || !invoice.customerId) {
       alert('Bitte Rechnungsnummer und Kunde auswählen.');
@@ -160,7 +128,7 @@ export function InvoicePage() {
     }
 
     // Create immutable snapshot
-    const invoiceWithSnapshot = createInvoiceSnapshot();
+    const invoiceWithSnapshot = createInvoiceSnapshot(invoice, customers, services);
 
     const allInvoices = loadInvoices();
     const existingIndex = allInvoices.findIndex((inv) => inv.id === invoice.id);
@@ -223,7 +191,7 @@ export function InvoicePage() {
 
   // Create live preview invoice with snapshots for calculations and display
   const previewInvoice = useMemo(() => {
-    return createInvoiceSnapshot();
+    return createInvoiceSnapshot(invoice, customers, services);
   }, [invoice, customers, services]);
 
   // Berechnungen
