@@ -4,6 +4,7 @@ import { Service } from '@/models/types';
 import { IconUpload, IconAlertCircle, IconFileTypeCsv } from '@tabler/icons-react';
 import { formatCurrency } from '@/utils/money';
 import { parseCsvFile, parseLocaleNumber } from '@/utils/csvImport';
+import { generateUUID } from '@/utils/uuid';
 
 interface ServiceCSVImportModalProps {
   opened: boolean;
@@ -78,7 +79,7 @@ export function ServiceCSVImportModal({
 
         // Create service object
         services.push({
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           name: row.name.trim(),
           hourlyRate,
           taxRate,

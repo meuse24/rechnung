@@ -1,6 +1,7 @@
 import { Modal, TextInput, Button, Stack, NumberInput } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { Service } from '@/models/types';
+import { generateUUID } from '@/utils/uuid';
 
 interface ServiceFormModalProps {
   opened: boolean;
@@ -56,7 +57,7 @@ export function ServiceFormModal({
     }
 
     const serviceToSave: Service = {
-      id: service?.id || crypto.randomUUID(),
+      id: service?.id || generateUUID(),
       ...formData,
     };
 

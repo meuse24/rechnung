@@ -54,6 +54,22 @@ Details: siehe [THEME_GUIDE.md](THEME_GUIDE.md)
 - **Code Quality**: ESLint mit TypeScript & React Hooks
 - **Build**: vite-plugin-singlefile (Single-File Output)
 
+## Browser-Kompatibilität
+
+Die Anwendung ist vollständig kompatibel mit folgenden Browsern:
+
+- ✅ **Chrome 90+** (April 2021)
+- ✅ **Edge 90+** (April 2021)
+- ✅ **Safari 14+** (September 2020)
+- ✅ **Firefox 85+** (Januar 2021)
+
+**Kompatibilitäts-Features:**
+- Automatischer Polyfill für UUID-Generierung in älteren Browsern
+- Kompatible CSS-Lösungen ohne moderne Features (z.B. `light-dark()`)
+- Getestet und funktional in allen aufgeführten Browser-Versionen
+
+Details zu den Kompatibilitätsfixes: siehe [THEME_GUIDE.md](THEME_GUIDE.md#compatibility-fixes)
+
 ## Installation & Start
 
 ```bash

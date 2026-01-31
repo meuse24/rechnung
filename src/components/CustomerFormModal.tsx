@@ -1,6 +1,7 @@
 import { Modal, TextInput, Button, Stack } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { Customer } from '@/models/types';
+import { generateUUID } from '@/utils/uuid';
 
 interface CustomerFormModalProps {
   opened: boolean;
@@ -55,7 +56,7 @@ export function CustomerFormModal({
     }
 
     const customerToSave: Customer = {
-      id: customer?.id || crypto.randomUUID(),
+      id: customer?.id || generateUUID(),
       ...formData,
       email: formData.email || undefined,
     };

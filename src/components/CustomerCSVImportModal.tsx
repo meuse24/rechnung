@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Customer } from '@/models/types';
 import { IconUpload, IconAlertCircle, IconFileTypeCsv } from '@tabler/icons-react';
 import { parseCsvFile } from '@/utils/csvImport';
+import { generateUUID } from '@/utils/uuid';
 
 interface CustomerCSVImportModalProps {
   opened: boolean;
@@ -73,7 +74,7 @@ export function CustomerCSVImportModal({
 
         // Create customer object
         customers.push({
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           name: row.name.trim(),
           addressLine1: row.addressLine1.trim(),
           postalCode: row.postalCode.trim(),

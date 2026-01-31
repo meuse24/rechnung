@@ -5,7 +5,23 @@
 
 /* Background colors for light and dark mode */
 body {
-  background-color: light-dark(#f0f4f8, var(--mantine-color-dark-7));
+  background-color: #f0f4f8;
+}
+
+/* Dark mode background */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--mantine-color-dark-7);
+  }
+}
+
+/* Support for explicit color scheme attribute (Mantine v7+) */
+[data-mantine-color-scheme='dark'] body {
+  background-color: var(--mantine-color-dark-7);
+}
+
+[data-mantine-color-scheme='light'] body {
+  background-color: #f0f4f8;
 }
 
 /* Enhanced focus visibility for all focusable elements */

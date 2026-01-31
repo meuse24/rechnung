@@ -3,19 +3,20 @@
  */
 
 import { ExportData } from './dataExport';
+import { generateUUID } from './uuid';
 
 /**
  * Generates realistic Austrian sample data with complete snapshots
  */
 export function generateSampleData(): ExportData {
-  const customerId1 = crypto.randomUUID();
-  const customerId2 = crypto.randomUUID();
-  const customerId3 = crypto.randomUUID();
+  const customerId1 = generateUUID();
+  const customerId2 = generateUUID();
+  const customerId3 = generateUUID();
 
-  const serviceId1 = crypto.randomUUID();
-  const serviceId2 = crypto.randomUUID();
-  const serviceId3 = crypto.randomUUID();
-  const serviceId4 = crypto.randomUUID();
+  const serviceId1 = generateUUID();
+  const serviceId2 = generateUUID();
+  const serviceId3 = generateUUID();
+  const serviceId4 = generateUUID();
 
   return {
     version: '2.0.0',
@@ -97,7 +98,7 @@ export function generateSampleData(): ExportData {
     ],
     invoices: [
       {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         invoiceNumber: 'RE-2024-001',
         issueDate: '2024-01-15',
         customerId: customerId1,
@@ -132,7 +133,7 @@ export function generateSampleData(): ExportData {
         ],
       },
       {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         invoiceNumber: 'RE-2024-002',
         issueDate: '2024-02-20',
         customerId: customerId2,
@@ -166,7 +167,7 @@ export function generateSampleData(): ExportData {
         ],
       },
       {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         invoiceNumber: 'RE-2024-003',
         issueDate: '2024-03-10',
         customerId: customerId3,

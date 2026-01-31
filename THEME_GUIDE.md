@@ -174,12 +174,32 @@ option: {
 - **2px offset** for clear separation
 - **Keyboard-only** via `:focus-visible`
 
+## Compatibility Fixes
+
+The application includes compatibility fixes for older browsers to ensure support for the listed browser versions:
+
+### UUID Generation (`src/utils/uuid.ts`)
+- **Issue:** `crypto.randomUUID()` is not supported in Safari 14-15.3 and Chrome 90-91
+- **Solution:** Custom `generateUUID()` function with automatic fallback
+  - Uses native `crypto.randomUUID()` when available (Chrome 92+, Safari 15.4+)
+  - Falls back to RFC 4122 compliant polyfill for older browsers
+  - Used for all ID generation (customers, services, invoices, imports)
+
+### CSS Light-Dark Function (`src/theme.css`)
+- **Issue:** CSS `light-dark()` function requires Chrome 123+, Safari 17.5+
+- **Solution:** Replaced with traditional CSS media queries and attribute selectors
+  - Uses `@media (prefers-color-scheme: dark)` for automatic detection
+  - Supports Mantine's `data-mantine-color-scheme` attribute for manual toggle
+  - Fully backward compatible with Chrome 90+ and Safari 14+
+
 ## Browser Support
 
 - ✅ Chrome 90+
 - ✅ Firefox 85+
 - ✅ Safari 14+
 - ✅ Edge 90+
+
+All features including UUID generation and dark mode are fully functional in these browser versions.
 
 ## Performance
 

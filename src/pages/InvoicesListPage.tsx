@@ -30,6 +30,7 @@ import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
 import { formatGermanDate } from '@/utils/date';
+import { generateUUID } from '@/utils/uuid';
 
 export function InvoicesListPage() {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ export function InvoicesListPage() {
   const handleDuplicate = (invoice: Invoice) => {
     const duplicated: Invoice = {
       ...invoice,
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       invoiceNumber: invoice.invoiceNumber + '-KOPIE',
       issueDate: new Date().toISOString().split('T')[0],
       status: 'draft',

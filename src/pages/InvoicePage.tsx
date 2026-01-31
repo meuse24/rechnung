@@ -20,6 +20,7 @@ import { InvoiceTotalsPanel } from '@/components/invoice/InvoiceTotalsPanel';
 import { InvoiceNotesPanel } from '@/components/invoice/InvoiceNotesPanel';
 import { InvoicePageHeader } from '@/components/invoice/InvoicePageHeader';
 import { useInvoiceDependencies } from '@/hooks/useInvoiceDependencies';
+import { generateUUID } from '@/utils/uuid';
 
 export function InvoicePage() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -27,7 +28,7 @@ export function InvoicePage() {
   const location = useLocation();
   const { customers, services, companySettings, isLoading, error } = useInvoiceDependencies();
   const [invoice, setInvoice] = useState<Invoice>({
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     invoiceNumber: '',
     issueDate: new Date().toISOString().split('T')[0],
     customerId: '',
