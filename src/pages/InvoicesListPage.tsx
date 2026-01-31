@@ -173,9 +173,9 @@ export function InvoicesListPage() {
                   <Table.Th>Rechnungsnr.</Table.Th>
                   <Table.Th>Datum</Table.Th>
                   <Table.Th>Kunde</Table.Th>
-                  <Table.Th>Netto</Table.Th>
-                  <Table.Th>Brutto</Table.Th>
-                  <Table.Th>Status</Table.Th>
+                  <Table.Th style={{ textAlign: 'right' }}>Netto</Table.Th>
+                  <Table.Th style={{ textAlign: 'right' }}>Brutto</Table.Th>
+                  <Table.Th style={{ width: 100 }}>Status</Table.Th>
                   <Table.Th style={{ width: 180 }}>Aktionen</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -189,8 +189,8 @@ export function InvoicesListPage() {
                       </Table.Td>
                       <Table.Td>{formatGermanDate(invoice.issueDate)}</Table.Td>
                       <Table.Td>{getCustomerName(invoice.customerId)}</Table.Td>
-                      <Table.Td>{formatCurrency(totals.netTotal)}</Table.Td>
-                      <Table.Td>
+                      <Table.Td style={{ textAlign: 'right' }}>{formatCurrency(totals.netTotal)}</Table.Td>
+                      <Table.Td style={{ textAlign: 'right' }}>
                         <Text fw={500}>{formatCurrency(totals.grossTotal)}</Text>
                       </Table.Td>
                       <Table.Td>{getStatusBadge(invoice.status)}</Table.Td>
