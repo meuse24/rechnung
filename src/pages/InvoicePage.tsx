@@ -56,6 +56,13 @@ export function InvoicePage() {
     }
   }, [invoiceId, navigate]);
 
+  // Setze Standard-Notizen für neue Rechnungen
+  useEffect(() => {
+    if (invoiceId === 'new' && companySettings?.defaultNotes && !invoice.notes) {
+      setInvoice((prev) => ({ ...prev, notes: companySettings.defaultNotes || '' }));
+    }
+  }, [invoiceId, companySettings?.defaultNotes]);
+
   // Auto-trigger PDF export wenn von Liste gestartet (nur einmal!)
   useEffect(() => {
     if (location.state?.exportPdf && invoice.invoiceNumber && !pdfExportTriggered.current) {
