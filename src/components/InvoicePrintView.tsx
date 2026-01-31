@@ -5,14 +5,18 @@ import { calculateInvoiceTotals } from '@/utils/calc';
 import { formatCurrency } from '@/utils/money';
 import { formatGermanDate } from '@/utils/date';
 
+const PAGE_WIDTH_MM = 210;
 const PAGE_HEIGHT_MM = 297;
-const PAGE_MARGIN_TOP_MM = 15;
-const PAGE_MARGIN_BOTTOM_MM = 15;
+const PAGE_MARGIN_MM = 15;
 const FOOTER_OFFSET_PX = 12;
-const PX_PER_MM = 96 / 25.4;
-const PAGE_CONTENT_HEIGHT_PX = Math.floor(
-  (PAGE_HEIGHT_MM - PAGE_MARGIN_TOP_MM - PAGE_MARGIN_BOTTOM_MM) * PX_PER_MM
-);
+
+const getPageContentHeightPx = (container: HTMLElement): number => {
+  const contentWidthMm = PAGE_WIDTH_MM - PAGE_MARGIN_MM * 2;
+  const contentHeightMm = PAGE_HEIGHT_MM - PAGE_MARGIN_MM * 2;
+  const rect = container.getBoundingClientRect();
+  const pxPerMm = rect.width > 0 ? rect.width / contentWidthMm : 96 / 25.4;
+  return Math.floor(contentHeightMm * pxPerMm);
+};
 
 const clearPrintPageNumbers = (container: HTMLElement | null) => {
   if (!container) return;
@@ -24,14 +28,15 @@ const addPrintPageNumbers = (container: HTMLElement | null) => {
   clearPrintPageNumbers(container);
 
   const contentHeight = container.scrollHeight;
-  if (!contentHeight || PAGE_CONTENT_HEIGHT_PX <= 0) return;
+  const pageContentHeightPx = getPageContentHeightPx(container);
+  if (!contentHeight || pageContentHeightPx <= 0) return;
 
-  const pageCount = Math.max(1, Math.ceil(contentHeight / PAGE_CONTENT_HEIGHT_PX));
+  const pageCount = Math.max(1, Math.ceil(contentHeight / pageContentHeightPx));
   for (let page = 1; page <= pageCount; page += 1) {
     const marker = document.createElement('div');
     marker.className = 'print-page-number';
     marker.textContent = `Seite ${page} / ${pageCount}`;
-    marker.style.top = `${page * PAGE_CONTENT_HEIGHT_PX - FOOTER_OFFSET_PX}px`;
+    marker.style.top = `${page * pageContentHeightPx - FOOTER_OFFSET_PX}px`;
     container.appendChild(marker);
   }
 };
