@@ -50,7 +50,7 @@ export function HelpPage() {
             <Text>Folgen Sie diesen Schritten für Ihre erste Rechnung:</Text>
             <List spacing="sm">
               <List.Item>
-                <strong>1. Einstellungen:</strong> Firmendaten, Bankverbindung und
+                <strong>1. Stammdaten:</strong> Firmendaten, Bankverbindung und
                 Zahlungsbedingungen eingeben
               </List.Item>
               <List.Item>
@@ -60,12 +60,16 @@ export function HelpPage() {
                 <strong>3. Leistungen:</strong> Ihre Stundenleistungen mit Preisen hinterlegen
               </List.Item>
               <List.Item>
-                <strong>4. Rechnung:</strong> Erste Rechnung erstellen und drucken
+                <strong>4. Rechnung:</strong> Erste Rechnung erstellen und als PDF exportieren
               </List.Item>
               <List.Item>
-                <strong>5. Backup:</strong> Daten exportieren und sicher speichern
+                <strong>5. Daten:</strong> Backup erstellen und sicher speichern
               </List.Item>
             </List>
+            <Alert color="cyan" mt="md">
+              <strong>Tipp für Schulungen:</strong> Im Menü "Daten" können Sie mit einem Klick
+              Musterdaten laden oder alle Daten zurücksetzen.
+            </Alert>
           </Stack>
         </Paper>
 
@@ -73,7 +77,7 @@ export function HelpPage() {
         <Divider label="Detaillierte Anleitung" labelPosition="center" />
 
         <Accordion defaultValue="settings">
-          {/* Einstellungen */}
+          {/* Stammdaten */}
           <Accordion.Item value="settings">
             <Accordion.Control
               icon={
@@ -82,7 +86,7 @@ export function HelpPage() {
                 </ThemeIcon>
               }
             >
-              <Text fw={600}>1. Einstellungen (Firmenstammdaten)</Text>
+              <Text fw={600}>1. Stammdaten (Firmendaten)</Text>
             </Accordion.Control>
             <Accordion.Panel>
               <Stack gap="md">
@@ -90,22 +94,6 @@ export function HelpPage() {
                   <strong>Zweck:</strong> Hinterlegen Sie hier Ihre Firmendaten, die auf allen
                   Rechnungen erscheinen.
                 </Text>
-
-                <Title order={4}>Datensicherung</Title>
-                <List>
-                  <List.Item>
-                    <strong>Alle Daten exportieren:</strong> Lädt eine JSON-Datei mit allen Ihren
-                    Daten herunter
-                  </List.Item>
-                  <List.Item>
-                    <strong>Daten importieren:</strong> Stellt Daten aus einer Backup-Datei wieder
-                    her
-                  </List.Item>
-                  <List.Item>
-                    <strong>Tipp:</strong> Exportieren Sie regelmäßig Backups und speichern Sie
-                    diese sicher (Cloud, USB-Stick)
-                  </List.Item>
-                </List>
 
                 <Title order={4}>Firmendaten / Briefkopf</Title>
                 <List>
@@ -401,7 +389,7 @@ export function HelpPage() {
             </Accordion.Panel>
           </Accordion.Item>
 
-          {/* Backup & Migration */}
+          {/* Datenverwaltung */}
           <Accordion.Item value="backup">
             <Accordion.Control
               icon={
@@ -410,7 +398,7 @@ export function HelpPage() {
                 </ThemeIcon>
               }
             >
-              <Text fw={600}>6. Datensicherung & Migration</Text>
+              <Text fw={600}>6. Datenverwaltung (Menü "Daten")</Text>
             </Accordion.Control>
             <Accordion.Panel>
               <Stack gap="md">
@@ -422,7 +410,7 @@ export function HelpPage() {
                 <Title order={4}>Daten exportieren (Backup)</Title>
                 <List>
                   <List.Item>
-                    Gehen Sie zu <strong>Einstellungen</strong>
+                    Gehen Sie zu <strong>Daten</strong> (erster Menüpunkt)
                   </List.Item>
                   <List.Item>
                     Klicken Sie <strong>"Alle Daten exportieren"</strong>
@@ -439,7 +427,7 @@ export function HelpPage() {
                 <Title order={4}>Daten importieren (Wiederherstellen)</Title>
                 <List>
                   <List.Item>
-                    Gehen Sie zu <strong>Einstellungen</strong>
+                    Gehen Sie zu <strong>Daten</strong>
                   </List.Item>
                   <List.Item>
                     Klicken Sie <strong>"Daten importieren"</strong>
@@ -451,36 +439,42 @@ export function HelpPage() {
                   </List.Item>
                 </List>
 
+                <Title order={4}>Musterdaten laden (für Schulungen)</Title>
+                <List>
+                  <List.Item>
+                    Klicken Sie <strong>"Musterdaten laden"</strong>
+                  </List.Item>
+                  <List.Item>
+                    Lädt österreichische Beispieldaten: Firma, Kunden, Leistungen, Rechnungen
+                  </List.Item>
+                  <List.Item>
+                    <strong>Achtung:</strong> Überschreibt alle vorhandenen Daten!
+                  </List.Item>
+                </List>
+
+                <Title order={4}>Alle Daten zurücksetzen</Title>
+                <List>
+                  <List.Item>
+                    Klicken Sie <strong>"Alle Daten zurücksetzen"</strong>
+                  </List.Item>
+                  <List.Item>Löscht alle Kunden, Leistungen, Rechnungen und Stammdaten</List.Item>
+                  <List.Item>Ideal für Schulungen: Neustart mit leerem System</List.Item>
+                </List>
+
                 <Title order={4}>Was wird gesichert?</Title>
                 <Paper p="sm" bg="gray.0">
                   <List>
                     <List.Item>✓ Alle Kunden</List.Item>
                     <List.Item>✓ Alle Leistungen</List.Item>
                     <List.Item>✓ Firmenstammdaten</List.Item>
-                    <List.Item>✓ Aktuelle Rechnung</List.Item>
+                    <List.Item>✓ Alle Rechnungen</List.Item>
                   </List>
                 </Paper>
 
-                <Title order={4}>Anwendungsfälle</Title>
-                <List>
-                  <List.Item>
-                    <strong>Backup:</strong> Regelmäßige Sicherung (z.B. wöchentlich)
-                  </List.Item>
-                  <List.Item>
-                    <strong>Migration:</strong> Wechsel auf anderen Browser oder Rechner
-                  </List.Item>
-                  <List.Item>
-                    <strong>Wiederherstellung:</strong> Nach Browser-Cache-Löschung
-                  </List.Item>
-                  <List.Item>
-                    <strong>Archivierung:</strong> Alte Daten aufbewahren
-                  </List.Item>
-                </List>
-
                 <Alert color="red" mt="md" title="Wichtiger Sicherheitshinweis">
-                  <strong>Erstellen Sie vor dem Import ein Backup Ihrer aktuellen Daten!</strong>{' '}
-                  Der Import überschreibt alle vorhandenen Daten und kann nicht rückgängig gemacht
-                  werden.
+                  <strong>Erstellen Sie vor dem Import oder Reset ein Backup!</strong>{' '}
+                  Diese Aktionen überschreiben alle vorhandenen Daten und können nicht rückgängig
+                  gemacht werden.
                 </Alert>
               </Stack>
             </Accordion.Panel>
@@ -499,8 +493,9 @@ export function HelpPage() {
                 Q: Kann ich mehrere Rechnungen gleichzeitig verwalten?
               </Text>
               <Text size="sm">
-                A: Aktuell kann nur eine Rechnung gespeichert werden. Sie können aber jede Rechnung
-                als PDF speichern und dann eine neue Rechnung erstellen.
+                A: Ja! Unter "Rechnungen" finden Sie eine vollständige Übersicht aller Ihrer
+                Rechnungen. Sie können beliebig viele Rechnungen erstellen, bearbeiten, duplizieren
+                und mit Status versehen (Entwurf, Versendet, Bezahlt, Storniert).
               </Text>
             </div>
 
@@ -552,6 +547,58 @@ export function HelpPage() {
                 erscheinen.
               </Text>
             </div>
+
+            <Divider />
+
+            <div>
+              <Text fw={600} mb="xs">
+                Q: Kann ich die App auf meinem eigenen Webserver hosten?
+              </Text>
+              <Text size="sm">
+                A: Ja! Führen Sie <Code>npm run build</Code> aus und laden Sie den kompletten{' '}
+                <Code>dist/</Code> Ordner auf Ihren Webserver hoch. Die App funktioniert auf jedem
+                statischen Webserver ohne spezielle Konfiguration.
+              </Text>
+            </div>
+
+            <Divider />
+
+            <div>
+              <Text fw={600} mb="xs">
+                Q: Warum sehen die URLs so komisch aus (mit #)?
+              </Text>
+              <Text size="sm">
+                A: Die App verwendet Hash-basierte URLs (z.B. <Code>/#/invoices</Code>), damit sie
+                auf jedem Webserver funktioniert - ohne Server-seitige Konfiguration. Das ist
+                technisch bedingt und beeinträchtigt die Funktionalität nicht.
+              </Text>
+            </div>
+
+            <Divider />
+
+            <div>
+              <Text fw={600} mb="xs">
+                Q: Die App lädt langsam - was kann ich tun?
+              </Text>
+              <Text size="sm">
+                A: Beim ersten Laden werden ca. 2 MB an Daten übertragen. Danach cached Ihr Browser
+                die Dateien und die App startet schneller. Stellen Sie sicher, dass Ihr Webserver
+                Gzip-Komprimierung aktiviert hat (reduziert auf ca. 700 KB).
+              </Text>
+            </div>
+
+            <Divider />
+
+            <div>
+              <Text fw={600} mb="xs">
+                Q: Funktioniert die App auch offline?
+              </Text>
+              <Text size="sm">
+                A: Ja, nach dem ersten Laden funktioniert die App komplett offline. Alle Daten
+                werden lokal in Ihrem Browser gespeichert. Sie benötigen nur Internet, um die App
+                initial zu laden oder Updates zu erhalten.
+              </Text>
+            </div>
           </Stack>
         </Paper>
 
@@ -561,7 +608,7 @@ export function HelpPage() {
             <Title order={4}>Technische Hinweise</Title>
             <List size="sm">
               <List.Item>
-                <strong>Browser:</strong> Moderne Browser (Chrome, Firefox, Safari, Edge)
+                <strong>Browser:</strong> Chrome 90+, Firefox 85+, Safari 14+, Edge 90+
               </List.Item>
               <List.Item>
                 <strong>Speicher:</strong> LocalStorage (ca. 5-10 MB Limit)
@@ -570,7 +617,13 @@ export function HelpPage() {
                 <strong>Offline:</strong> App funktioniert komplett offline nach dem ersten Laden
               </List.Item>
               <List.Item>
-                <strong>Updates:</strong> Laden Sie die Seite neu (F5) um Updates zu erhalten
+                <strong>Updates:</strong> Laden Sie die Seite neu (F5 oder Strg+Shift+R) um Updates zu erhalten
+              </List.Item>
+              <List.Item>
+                <strong>Dateigröße:</strong> Ca. 2.3 MB (komprimiert: 720 KB mit Gzip)
+              </List.Item>
+              <List.Item>
+                <strong>Hosting:</strong> Funktioniert auf jedem statischen Webserver
               </List.Item>
             </List>
           </Stack>

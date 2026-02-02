@@ -11,6 +11,7 @@ import {
   Stack,
 } from '@mantine/core';
 import { IconEdit, IconTrash, IconPlus, IconDownload, IconUpload } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { Customer } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { CustomerFormModal } from '@/components/CustomerFormModal';
@@ -78,7 +79,11 @@ export function CustomersPage() {
   const handleCSVImport = (importedCustomers: Customer[]) => {
     const updated = [...customers, ...importedCustomers];
     saveCustomers(updated);
-    alert(`${importedCustomers.length} Kunden erfolgreich importiert.`);
+    notifications.show({
+      title: 'Import erfolgreich',
+      message: `${importedCustomers.length} Kunden wurden importiert.`,
+      color: 'green',
+    });
   };
 
   const deletingCustomer = customers.find((c) => c.id === deletingCustomerId);

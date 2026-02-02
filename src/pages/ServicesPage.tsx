@@ -12,6 +12,7 @@ import {
   Badge,
 } from '@mantine/core';
 import { IconEdit, IconTrash, IconPlus, IconDownload, IconUpload } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { Service } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
 import { ServiceFormModal } from '@/components/ServiceFormModal';
@@ -80,7 +81,11 @@ export function ServicesPage() {
   const handleCSVImport = (importedServices: Service[]) => {
     const updated = [...services, ...importedServices];
     saveServices(updated);
-    alert(`${importedServices.length} Leistungen erfolgreich importiert.`);
+    notifications.show({
+      title: 'Import erfolgreich',
+      message: `${importedServices.length} Leistungen wurden importiert.`,
+      color: 'green',
+    });
   };
 
   const deletingService = services.find((s) => s.id === deletingServiceId);

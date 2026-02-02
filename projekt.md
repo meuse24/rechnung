@@ -17,7 +17,9 @@ Eine Rechnungs-Webapp (Vite + React + TypeScript) mit vollständiger Rechnungsve
 8. **Vollständiger Datenexport/-import** für Backup und Browser-Migration
 10. **Integrierte Hilfe & Anleitung** für alle Funktionen
 11. **Österreichische Lokalisierung** (AT als Standard, Komma-Eingabe für Zahlen)
-12. **Single-File Build** (nur eine index.html für einfaches Deployment)
+12. **Multi-File Build** mit Browser-Caching für schnelle Updates
+13. **Musterdaten laden** - Beispieldaten für Schulungen mit einem Klick
+14. **Daten zurücksetzen** - Sauberer Neustart für Schulungen
 
 **Scope**: Client-only App ohne Backend, optimiert für einfache Nutzung und Deployment.
 
@@ -32,7 +34,7 @@ Eine Rechnungs-Webapp (Vite + React + TypeScript) mit vollständiger Rechnungsve
 - **CSV Parsing**: papaparse
 - **PDF Export**: @react-pdf/renderer
 - **Linting**: ESLint mit TypeScript & React Hooks Plugins
-- **Build**: Single-File Build (vite-plugin-singlefile) - nur index.html im dist-Ordner
+- **Build**: Multi-File Build mit Vite (Browser-Caching, HashRouter für statisches Hosting)
 
 ## Datenmodelle
 
@@ -90,7 +92,21 @@ interface InvoiceLine {
 
 ## Screens / Seiten
 
-### 1. Einstellungen-Seite
+**Navigation (5 Tabs):** Daten | Stammdaten | Kunden | Leistungen | Rechnungen
+
+### 1. Daten-Seite (NEU - erster Tab)
+- **Datensicherung**:
+  - Export aller Daten als JSON (Kunden, Leistungen, Firmendaten, Rechnungen)
+  - Import von JSON-Backup für Migration zwischen Browsern
+- **Musterdaten laden**:
+  - Lädt realistische österreichische Beispieldaten mit einem Klick
+  - Firmenstammdaten, 3 Kunden, 4 Leistungen, 3 Rechnungen
+  - Ideal für Schulungen und Tests
+- **Daten zurücksetzen**:
+  - Löscht alle Daten unwiderruflich
+  - Sauberer Neustart für Schulungen
+
+### 2. Stammdaten-Seite (früher Einstellungen)
 - Firmenstammdaten / Briefkopf:
   - Firmenname, Adresse, Kontaktdaten
   - Steuernummer, USt-IdNr.
@@ -99,14 +115,11 @@ interface InvoiceLine {
 - Zahlungsbedingungen:
   - Standard Zahlungstext
   - Standard-Notizen für Rechnungen
-- **Datensicherung**:
-  - Export aller Daten als JSON (Kunden, Leistungen, Firmendaten, Rechnung)
-  - Import von JSON-Backup für Migration zwischen Browsern
 - Speichern in LocalStorage
 - Daten werden auf gedruckten Rechnungen angezeigt
 - Standard-Land: Österreich (AT)
 
-### 2. Kunden-Seite
+### 3. Kunden-Seite
 - Liste aller Kunden anzeigen
 - Kunde hinzufügen/bearbeiten/löschen
 - **CSV-Vorlage herunterladen**: Download-Button für Excel-kompatible CSV-Vorlage
@@ -114,7 +127,7 @@ interface InvoiceLine {
 - Speichern in LocalStorage als JSON-Liste
 - Empty State wenn keine Kunden vorhanden
 
-### 3. Leistungen-Seite
+### 4. Leistungen-Seite
 - Liste aller Leistungen anzeigen
 - Leistung hinzufügen/bearbeiten/löschen
 - Felder: Name, Stundensatz, Steuersatz
@@ -124,7 +137,7 @@ interface InvoiceLine {
 - **CSV importieren**: Batch-Import mit Validierung und Vorschau (unterstützt Komma und Punkt)
 - Speichern in LocalStorage als JSON-Liste
 
-### 4. Rechnungsübersicht (NEU)
+### 5. Rechnungsübersicht
 - Tabelle mit allen Rechnungen:
   - Rechnungsnummer, Datum, Kunde, Nettobetrag, Bruttobetrag, Status
 - **Suche**: Nach Rechnungsnummer, Kunde oder Datum filtern
@@ -139,7 +152,7 @@ interface InvoiceLine {
 - Empty State wenn keine Rechnungen vorhanden
 - Zähler: "X Rechnungen" anzeigen
 
-### 5. Rechnungsformular
+### 6. Rechnungsformular
 - **URL-Parameter Support**: /invoice/new oder /invoice/:id
 - **Zurück-Button**: Navigiert zur Rechnungsübersicht
 - Formular:
@@ -157,7 +170,7 @@ interface InvoiceLine {
 - Alert wenn keine Stammdaten vorhanden
 - Kundendetails-Vorschau
 
-### 6. Hilfe-Seite
+### 7. Hilfe-Seite
 - Schnellstart-Guide
 - Detaillierte Anleitungen für alle Features:
   - Einstellungen, Kunden, Leistungen
@@ -644,11 +657,12 @@ src/
 ├── app/
 │   └── Layout.tsx                  # App-Layout mit Tab-Navigation + Hilfe-Button
 ├── pages/
-│   ├── SettingsPage.tsx            # Firmenstammdaten + Datensicherung
+│   ├── DataPage.tsx                # Datenverwaltung (Import/Export/Musterdaten/Reset) (NEU)
+│   ├── SettingsPage.tsx            # Firmenstammdaten
 │   ├── CustomersPage.tsx           # Kundenverwaltung mit CSV Import
 │   ├── ServicesPage.tsx            # Leistungsverwaltung mit CSV Import
-│   ├── InvoicesListPage.tsx        # Rechnungsübersicht (NEU)
-│   ├── InvoicePage.tsx             # Rechnungsformular (bearbeitet: URL-Params, Status)
+│   ├── InvoicesListPage.tsx        # Rechnungsübersicht
+│   ├── InvoicePage.tsx             # Rechnungsformular
 │   └── HelpPage.tsx                # Hilfe & Anleitung
 ├── components/
 │   ├── CustomerFormModal.tsx       # Kunde hinzufügen/bearbeiten

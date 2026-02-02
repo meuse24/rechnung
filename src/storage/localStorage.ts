@@ -28,4 +28,13 @@ export function saveToStorage<T>(key: string, value: T): void {
   }
 }
 
+/**
+ * Löscht alle App-Daten aus dem LocalStorage
+ */
+export function clearAllData(): void {
+  Object.values(STORAGE_KEYS).forEach((key) => {
+    localStorage.removeItem(key);
+  });
+}
+
 export { STORAGE_KEYS };

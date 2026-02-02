@@ -18,7 +18,7 @@ Dieses Projekt demonstriert:
 1. **Kundenverwaltung**: Kunden hinzufügen, bearbeiten, löschen
 2. **Leistungsverwaltung**: Stundenleistungen mit Stundensatz und Steuersatz verwalten
 3. **Firmenstammdaten**: Briefkopf, Bankverbindung, Zahlungsbedingungen hinterlegen
-4. **Datensicherung**: Export/Import aller Daten als JSON-Backup (Browser-Migration, Backup)
+4. **Datenverwaltung**: Export/Import, Musterdaten laden, Daten zurücksetzen (ideal für Schulungen)
 5. **Rechnungsverwaltung**: Vollständige Rechnungshistorie mit Status-Tracking (Entwurf, Versendet, Bezahlt, Storniert)
 6. **Rechnungsformular**: Erstellen und Bearbeiten von Rechnungen mit automatischen Berechnungen
 7. **PDF-Export**: Professioneller PDF-Export mit @react-pdf/renderer inkl. Zahlungsbedingungen & Bankverbindung
@@ -27,7 +27,7 @@ Dieses Projekt demonstriert:
 10. **Hilfe & Anleitung**: Umfassende Schritt-für-Schritt Anleitung integriert (Hilfe-Button rechts oben)
 11. **Österreichische Lokalisierung**: Standard-Land AT, Komma-Eingabe für Zahlen (8,5 statt 8.5)
 12. **CSV-Import**: Massenimport von Kunden und Leistungen mit Vorlagen-Download
-13. **Single-File Build**: Komplette App in einer einzigen index.html (ca. 2.3 MB, gzip: 720 KB)
+13. **Optimierter Build**: Multi-File Build mit Caching-Unterstützung für schnelle Updates
 
 ## Accessibility & Theme
 
@@ -52,7 +52,8 @@ Details: siehe [THEME_GUIDE.md](THEME_GUIDE.md)
 - **State Management**: React Hooks (useState, useEffect, useRef, useMemo)
 - **Persistierung**: LocalStorage mit Cross-Tab Synchronization
 - **Code Quality**: ESLint mit TypeScript & React Hooks
-- **Build**: vite-plugin-singlefile (Single-File Output)
+- **Build**: Vite mit relativen Pfaden für statisches Hosting
+- **Routing**: HashRouter für statisches Hosting ohne Server-Konfiguration
 
 ## Browser-Kompatibilität
 
@@ -96,11 +97,12 @@ src/
 ├── app/
 │   └── Layout.tsx                      # App-Layout mit Navigation & Dark Mode Toggle
 ├── pages/
+│   ├── DataPage.tsx                    # Datenverwaltung (Import/Export/Musterdaten/Reset)
+│   ├── SettingsPage.tsx                # Firmenstammdaten
 │   ├── CustomersPage.tsx               # Kundenverwaltung (CRUD + CSV Import)
 │   ├── ServicesPage.tsx                # Leistungsverwaltung (CRUD + CSV Import)
 │   ├── InvoicesListPage.tsx            # Rechnungshistorie & Übersicht
 │   ├── InvoicePage.tsx                 # Rechnungsformular
-│   ├── SettingsPage.tsx                # Firmenstammdaten & Datenexport
 │   └── HelpPage.tsx                    # Hilfe & Anleitung
 ├── components/
 │   ├── invoice/                        # Modularisierte Rechnungskomponenten
@@ -173,26 +175,47 @@ src/
 }
 ```
 
-## Datensicherung & Migration
+## Navigation
+
+Die App hat 5 Hauptbereiche (Tabs):
+
+| Tab | Beschreibung |
+|-----|--------------|
+| **Daten** | Import/Export, Musterdaten laden, Daten zurücksetzen |
+| **Stammdaten** | Firmendaten, Bankverbindung, Zahlungsbedingungen |
+| **Kunden** | Kundenverwaltung mit CSV-Import |
+| **Leistungen** | Leistungsverwaltung mit CSV-Import |
+| **Rechnungen** | Rechnungsübersicht und -erstellung |
+
+## Datenverwaltung (Menü "Daten")
 
 ### Export/Import Funktionalität
 
-Da alle Daten nur im **Browser LocalStorage** gespeichert sind, bietet die App Export/Import-Funktionen für:
-- **Backup**: Regelmäßige Datensicherung
-- **Migration**: Übertragung auf anderen Browser/Rechner
-- **Portabilität**: Daten sind nicht Browser-gebunden
+Da alle Daten nur im **Browser LocalStorage** gespeichert sind, bietet die App Export/Import-Funktionen:
 
 **Verwendung:**
-1. Einstellungen-Tab öffnen
+1. "Daten"-Tab öffnen (erster Menüpunkt)
 2. "Alle Daten exportieren" → lädt `invoice-backup-YYYY-MM-DD.json` herunter
 3. JSON-Datei sicher speichern (z.B. Cloud, USB-Stick)
 4. Auf anderem Browser/Rechner: "Daten importieren" → JSON-Datei hochladen
+
+### Musterdaten laden (für Schulungen)
+
+Mit einem Klick realistische österreichische Beispieldaten laden:
+- Firmenstammdaten (Tech Solutions Wien GmbH)
+- 3 Kunden (ÖBB, Wiener Stadtwerke, Graz Innovations)
+- 4 Leistungen (Software-Entwicklung, IT-Beratung, etc.)
+- 3 Beispiel-Rechnungen mit verschiedenen Status
+
+### Daten zurücksetzen
+
+Löscht alle Daten für einen sauberen Neustart - ideal für Schulungen.
 
 **Exportierte Daten:**
 - Alle Kunden
 - Alle Leistungen
 - Firmenstammdaten
-- Aktuelle Rechnung
+- Alle Rechnungen
 - Version & Exportdatum
 
 ## LocalStorage Keys
@@ -214,23 +237,53 @@ Da alle Daten nur im **Browser LocalStorage** gespeichert sind, bietet die App E
 
 **Status**: ✅ Projekt vollständig implementiert!
 
-## Single-File Build
+## Build & Deployment
 
-Das Projekt nutzt `vite-plugin-singlefile` für einen optimierten Build:
+### Production Build erstellen
 
 ```bash
 npm run build
 ```
 
-Erzeugt **nur eine einzige Datei**: `dist/index.html` (ca. 2.3 MB, gzip: 720 KB)
+Erzeugt den `dist/` Ordner mit folgender Struktur:
 
-- Alle JavaScript-Module inline
-- Alle CSS-Styles inline
-- Keine externen Dependencies
-- Perfekt für einfaches Deployment oder Offline-Nutzung
+```
+dist/
+├── index.html          (0.5 KB)
+├── favicon.svg         (App-Icon)
+└── assets/
+    ├── index-xxx.js    (ca. 2.1 MB, gzip: 689 KB)
+    └── index-xxx.css   (ca. 207 KB, gzip: 30 KB)
+```
+
+### Deployment auf Webserver
+
+1. **Kompletten `dist/` Ordner hochladen** (inkl. `assets/` Unterordner)
+2. Die Ordnerstruktur muss erhalten bleiben:
+   ```
+   https://ihre-domain.de/index.html
+   https://ihre-domain.de/favicon.svg
+   https://ihre-domain.de/assets/index-xxx.js
+   https://ihre-domain.de/assets/index-xxx.css
+   ```
+
+### Vorteile des Multi-File Builds
+
+- **Browser-Caching**: JS/CSS werden separat gecached
+- **Schnellere Updates**: Bei Änderungen müssen Nutzer nur geänderte Dateien neu laden
+- **Content-Hashing**: Dateinamen enthalten Hashes (z.B. `index-BEkQKq6F.js`) - ändert sich der Code, ändert sich der Hash → automatisches Cache-Busting
+
+### HashRouter
+
+Die App verwendet `HashRouter` statt `BrowserRouter`. URLs sehen so aus:
+- `https://ihre-domain.de/#/` (Startseite)
+- `https://ihre-domain.de/#/customers` (Kunden)
+- `https://ihre-domain.de/#/invoices` (Rechnungen)
+
+**Vorteil**: Funktioniert auf jedem statischen Webserver ohne Server-Konfiguration.
 
 ```bash
-# Preview des Production Builds
+# Preview des Production Builds lokal testen
 npm run preview
 ```
 
@@ -244,4 +297,4 @@ npm run preview
 - Browser-APIs (LocalStorage, FileReader, Blob, File Download, Print)
 - Responsive UI mit Mantine
 - Export/Import Pattern für Client-Only Apps
-- Single-File Build Configuration
+- Vite Build-Konfiguration für statisches Hosting

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <!-- Dokument -->
+  <path d="M12 4 L40 4 L52 16 L52 56 Q52 60 48 60 L16 60 Q12 60 12 56 Z" fill="white" stroke="url(#grad)" stroke-width="3"/>
+  <!-- Eselsohr -->
+  <path d="M40 4 L40 16 L52 16" fill="#e0e7ff" stroke="url(#grad)" stroke-width="2"/>
+  <!-- Euro-Zeichen -->
+  <text x="32" y="44" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="url(#grad)" text-anchor="middle">€</text>
+  <!-- Linien -->
+  <line x1="20" y1="52" x2="44" y2="52" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
+</svg>

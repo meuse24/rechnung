@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Title,
@@ -12,23 +12,9 @@ import {
   Divider,
   Alert,
 } from '@mantine/core';
-import {
-  IconDeviceFloppy,
-  IconInfoCircle,
-  IconDownload,
-  IconUpload,
-  IconFileExport,
-  IconDatabase,
-} from '@tabler/icons-react';
+import { IconDeviceFloppy, IconInfoCircle } from '@tabler/icons-react';
 import { CompanySettings } from '@/models/types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/storage/localStorage';
-import {
-  exportAllData,
-  downloadDataAsJson,
-  importDataFromFile,
-  importAllData,
-} from '@/utils/dataExport';
-import { downloadSampleData } from '@/utils/sampleData';
 
 const DEFAULT_SETTINGS: CompanySettings = {
   companyName: '',
@@ -53,10 +39,6 @@ const DEFAULT_SETTINGS: CompanySettings = {
 export function SettingsPage() {
   const [settings, setSettings] = useState<CompanySettings>(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
-  const [exportSuccess, setExportSuccess] = useState(false);
-  const [importSuccess, setImportSuccess] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Laden beim Mount
   useEffect(() => {
@@ -77,57 +59,6 @@ export function SettingsPage() {
     setSettings({ ...settings, [field]: value });
   };
 
-  // Export alle Daten
-  const handleExport = () => {
-    try {
-      const data = exportAllData();
-      downloadDataAsJson(data);
-      setExportSuccess(true);
-      setTimeout(() => setExportSuccess(false), 3000);
-    } catch (error) {
-      alert('Fehler beim Exportieren der Daten: ' + error);
-    }
-  };
-
-  // Import Daten
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setImportError(null);
-
-    try {
-      const data = await importDataFromFile(file);
-      importAllData(data);
-
-      // Reload settings nach Import
-      const loaded = loadFromStorage<CompanySettings>(
-        STORAGE_KEYS.COMPANY_SETTINGS,
-        DEFAULT_SETTINGS
-      );
-      setSettings(loaded);
-
-      setImportSuccess(true);
-      setTimeout(() => setImportSuccess(false), 3000);
-    } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Unbekannter Fehler');
-      setTimeout(() => setImportError(null), 5000);
-    }
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleDownloadSample = () => {
-    downloadSampleData();
-  };
-
   return (
     <Container size="lg" py="xl">
       <Stack gap="lg">
@@ -146,103 +77,6 @@ export function SettingsPage() {
           Diese Daten erscheinen auf Ihren Rechnungen und werden in allen zukünftigen
           Rechnungen verwendet.
         </Alert>
-
-        {/* Datensicherung / Export/Import */}
-        <Paper p="md" withBorder>
-          <Stack gap="md">
-            <Group justify="space-between" align="center">
-              <div>
-                <Text fw={600} size="lg">
-                  Datensicherung
-                </Text>
-                <Text size="sm" c="dimmed">
-                  Exportieren Sie regelmäßig Ihre Daten als Backup
-                </Text>
-              </div>
-              <IconFileExport size={32} stroke={1.5} opacity={0.3} />
-            </Group>
-
-            {exportSuccess && (
-              <Alert color="green" title="Export erfolgreich">
-                Ihre Daten wurden als JSON-Datei heruntergeladen.
-              </Alert>
-            )}
-
-            {importSuccess && (
-              <Alert color="green" title="Import erfolgreich">
-                Alle Daten wurden erfolgreich importiert. Die Seite wird aktualisiert...
-              </Alert>
-            )}
-
-            {importError && (
-              <Alert color="red" title="Import fehlgeschlagen">
-                {importError}
-              </Alert>
-            )}
-
-            <Text size="sm">
-              <strong>Exportieren:</strong> Lädt alle Ihre Daten (Kunden, Leistungen,
-              Firmenstammdaten, Rechnung) als JSON-Datei herunter. Speichern Sie diese Datei
-              sicher als Backup.
-            </Text>
-
-            <Text size="sm">
-              <strong>Importieren:</strong> Lädt eine zuvor exportierte JSON-Datei und
-              überschreibt alle aktuellen Daten. Achtung: Dies kann nicht rückgängig gemacht
-              werden!
-            </Text>
-
-            <Group>
-              <Button
-                leftSection={<IconDownload size={16} />}
-                onClick={handleExport}
-                color={exportSuccess ? 'green' : 'blue'}
-                variant="filled"
-              >
-                {exportSuccess ? 'Exportiert!' : 'Alle Daten exportieren'}
-              </Button>
-
-              <Button
-                leftSection={<IconUpload size={16} />}
-                onClick={handleImportClick}
-                color={importSuccess ? 'green' : 'gray'}
-                variant="light"
-              >
-                {importSuccess ? 'Importiert!' : 'Daten importieren'}
-              </Button>
-
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json,application/json"
-                onChange={handleImport}
-                style={{ display: 'none' }}
-              />
-            </Group>
-
-            <Divider />
-
-            <Text size="sm">
-              <strong>Musterdaten:</strong> Laden Sie eine JSON-Datei mit realistischen
-              österreichischen Beispieldaten herunter (Firma, Kunden, Leistungen, Rechnungen).
-              Perfekt zum Testen der Anwendung.
-            </Text>
-
-            <Group>
-              <Button
-                leftSection={<IconDatabase size={16} />}
-                onClick={handleDownloadSample}
-                variant="outline"
-                color="cyan"
-              >
-                Musterdaten herunterladen
-              </Button>
-            </Group>
-          </Stack>
-        </Paper>
-
-        <Divider />
 
         {/* Firmenadresse / Briefkopf */}
         <Paper p="md" withBorder>

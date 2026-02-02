@@ -205,22 +205,13 @@ export function generateSampleData(): ExportData {
 }
 
 /**
- * Downloads sample data as JSON file
+ * Loads sample data directly into LocalStorage
  */
-export function downloadSampleData(): void {
+export function loadSampleData(): void {
   const data = generateSampleData();
-  const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
 
-  const filename = 'rechnung-musterdaten.json';
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  URL.revokeObjectURL(url);
+  localStorage.setItem('invoice_company_settings', JSON.stringify(data.companySettings));
+  localStorage.setItem('invoice_customers', JSON.stringify(data.customers));
+  localStorage.setItem('invoice_services', JSON.stringify(data.services));
+  localStorage.setItem('invoice_invoices', JSON.stringify(data.invoices));
 }

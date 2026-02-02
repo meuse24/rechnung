@@ -13,6 +13,7 @@ export function Layout() {
     if (location.pathname.startsWith('/customers')) return 'customers';
     if (location.pathname.startsWith('/services')) return 'services';
     if (location.pathname.startsWith('/invoice')) return 'invoices';
+    if (location.pathname.startsWith('/data')) return 'data';
     return 'settings';
   };
 
@@ -21,6 +22,7 @@ export function Layout() {
     else if (value === 'customers') navigate('/customers');
     else if (value === 'services') navigate('/services');
     else if (value === 'invoices') navigate('/invoices');
+    else if (value === 'data') navigate('/data');
   };
 
   const toggleColorScheme = () => {
@@ -41,7 +43,8 @@ export function Layout() {
         >
           <Tabs value={getActiveTab()} onChange={handleTabChange} variant="outline">
             <Tabs.List>
-              <Tabs.Tab value="settings">Einstellungen</Tabs.Tab>
+              <Tabs.Tab value="data">Daten</Tabs.Tab>
+              <Tabs.Tab value="settings">Stammdaten</Tabs.Tab>
               <Tabs.Tab value="customers">Kunden</Tabs.Tab>
               <Tabs.Tab value="services">Leistungen</Tabs.Tab>
               <Tabs.Tab value="invoices">Rechnungen</Tabs.Tab>
